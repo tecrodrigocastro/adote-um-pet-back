@@ -15,7 +15,7 @@ class PetController extends Controller
     {
         $pets = Pet::all();
 
-        return response()->json($pets);
+        return $this->success($pets, 'Busca realizada com sucesso!');
     }
 
     /**
@@ -35,10 +35,11 @@ class PetController extends Controller
 
         $pet = Pet::create($data);
 
-        return response()->json([
-            'message' => 'Pet created successfully',
-            'pet' => $pet,
-        ], 201);
+        return $this->success(
+            $pet,
+            'Pet cadastrado com sucesso!',
+            201
+        );
     }
 
     /**
@@ -46,7 +47,7 @@ class PetController extends Controller
      */
     public function show(Pet $pet)
     {
-        return response()->json($pet);
+        return $this->success($pet, 'Busca realizada com sucesso!');
     }
 
     /**
@@ -66,11 +67,7 @@ class PetController extends Controller
 
         $pet->update($data);
 
-        return response()->json([
-            'message' => 'Pet updated successfully',
-            'pet' => $pet,
-        ]);
-
+        return $this->success($pet, 'Pet atualizado com sucesso!');
     }
 
     /**
@@ -80,8 +77,6 @@ class PetController extends Controller
     {
         $pet->delete();
 
-        return response()->json([
-            'message' => 'Pet deleted successfully',
-        ]);
+        return $this->success([], 'Pet deletado com sucesso!');
     }
 }
