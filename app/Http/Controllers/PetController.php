@@ -6,10 +6,65 @@ use App\Http\Requests\StorePetRequest;
 use App\Http\Requests\UpdatePetRequest;
 use App\Models\Pet;
 
+/**
+ * @OA\SecurityScheme(
+ *     securityScheme="sanctum",
+ *     type="http",
+ *     scheme="bearer",
+ *     description="Enter token in format (Bearer <token>)",
+ *     in="header",
+ *     name="Authorization",
+ *     bearerFormat="JWT",
+ * )
+ */
 class PetController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * @OA\Get(
+     *     path="/api/pets",
+     *     tags={"Pets"},
+     *     summary="List all pets",
+     *     description="Fetch all pets from the database",
+     *     security={{"sanctum":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successfully retrieved list of pets",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Busca realizada com sucesso!"),
+     *             @OA\Property(property="data", type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Buddy"),
+     *                     @OA\Property(property="type", type="string", example="Dog"),
+     *                     @OA\Property(property="user_id", type="integer", example=1),
+     *                     @OA\Property(property="gender", type="string", example="Male"),
+     *                     @OA\Property(property="size", type="string", example="Medium"),
+     *                     @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
+     *                     @OA\Property(property="breed", type="string", example="Golden Retriever"),
+     *                     @OA\Property(property="color", type="string", example="Golden"),
+     *                     @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
+     *                     @OA\Property(property="description", type="string", example="A friendly and playful dog."),
+     *                     @OA\Property(property="photos", type="array",
+     *                         @OA\Items(type="string", example="https://example.com/photo1.jpg")
+     *                     ),
+     *                     @OA\Property(property="created_at", type="string", format="date-time", example="2023-12-01T10:00:00Z"),
+     *                     @OA\Property(property="updated_at", type="string", format="date-time", example="2023-12-01T10:00:00Z")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthorized."),
+     *             @OA\Property(property="data", type="null")
+     *         )
+     *     )
+     * )
      */
     public function index()
     {
@@ -27,7 +82,67 @@ class PetController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/pets",
+     *     tags={"Pets"},
+     *     summary="Create a new pet",
+     *     description="Create a new pet and store it in the database",
+     *     security={{"sanctum":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "type", "user_id", "gender", "size", "address", "description", "photos"},
+     *             @OA\Property(property="name", type="string", example="Buddy"),
+     *             @OA\Property(property="type", type="string", example="Dog"),
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="gender", type="string", example="Male"),
+     *             @OA\Property(property="size", type="string", example="Medium"),
+     *             @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
+     *             @OA\Property(property="breed", type="string", example="Golden Retriever"),
+     *             @OA\Property(property="color", type="string", example="Golden"),
+     *             @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
+     *             @OA\Property(property="description", type="string", example="A friendly and playful dog."),
+     *             @OA\Property(property="photos", type="array",
+     *                 @OA\Items(type="string", example="https://example.com/photo1.jpg")
+     *             )
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Pet successfully created",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Pet cadastrado com sucesso!"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Buddy"),
+     *                 @OA\Property(property="type", type="string", example="Dog"),
+     *                 @OA\Property(property="user_id", type="integer", example=1),
+     *                 @OA\Property(property="gender", type="string", example="Male"),
+     *                 @OA\Property(property="size", type="string", example="Medium"),
+     *                 @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
+     *                 @OA\Property(property="breed", type="string", example="Golden Retriever"),
+     *                 @OA\Property(property="color", type="string", example="Golden"),
+     *                 @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
+     *                 @OA\Property(property="description", type="string", example="A friendly and playful dog."),
+     *                 @OA\Property(property="photos", type="array",
+     *                     @OA\Items(type="string", example="https://example.com/photo1.jpg")
+     *                 ),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-12-01T10:00:00Z"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-12-01T10:00:00Z")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Dados inválidos."),
+     *             @OA\Property(property="data", type="null")
+     *         )
+     *     )
+     * )
      */
     public function store(StorePetRequest $request)
     {
@@ -43,7 +158,55 @@ class PetController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/pets/{id}",
+     *     tags={"Pets"},
+     *     summary="Display a specific pet",
+     *     description="Fetch a pet by its ID from the database",
+     *  security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the pet to retrieve",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successfully retrieved the pet",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Busca realizada com sucesso!"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Buddy"),
+     *                 @OA\Property(property="type", type="string", example="Dog"),
+     *                 @OA\Property(property="user_id", type="integer", example=1),
+     *                 @OA\Property(property="gender", type="string", example="Male"),
+     *                 @OA\Property(property="size", type="string", example="Medium"),
+     *                 @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
+     *                 @OA\Property(property="breed", type="string", example="Golden Retriever"),
+     *                 @OA\Property(property="color", type="string", example="Golden"),
+     *                 @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
+     *                 @OA\Property(property="description", type="string", example="A friendly and playful dog."),
+     *                 @OA\Property(property="photos", type="array",
+     *                     @OA\Items(type="string", example="https://example.com/photo1.jpg")
+     *                 ),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-12-01T10:00:00Z"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-12-01T10:00:00Z")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Pet not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Pet não encontrado."),
+     *             @OA\Property(property="data", type="null")
+     *         )
+     *     )
+     * )
      */
     public function show(Pet $pet)
     {
@@ -59,7 +222,74 @@ class PetController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * @OA\Put(
+     *     path="/api/pets/{id}",
+     *     tags={"Pets"},
+     *     summary="Update a pet",
+     *     description="Update the details of an existing pet",
+     *  security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the pet to update",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"name", "type", "user_id", "gender", "size", "address", "description", "photos"},
+     *             @OA\Property(property="name", type="string", example="Buddy"),
+     *             @OA\Property(property="type", type="string", example="Dog"),
+     *             @OA\Property(property="user_id", type="integer", example=1),
+     *             @OA\Property(property="gender", type="string", example="Male"),
+     *             @OA\Property(property="size", type="string", example="Medium"),
+     *             @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
+     *             @OA\Property(property="breed", type="string", example="Golden Retriever"),
+     *             @OA\Property(property="color", type="string", example="Golden"),
+     *             @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
+     *             @OA\Property(property="description", type="string", example="A friendly and playful dog."),
+     *             @OA\Property(property="photos", type="array",
+     *                 @OA\Items(type="string", example="https://example.com/photo1.jpg")
+     *             )
+     *         ),
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Pet updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Pet atualizado com sucesso!"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Buddy"),
+     *                 @OA\Property(property="type", type="string", example="Dog"),
+     *                 @OA\Property(property="user_id", type="integer", example=1),
+     *                 @OA\Property(property="gender", type="string", example="Male"),
+     *                 @OA\Property(property="size", type="string", example="Medium"),
+     *                 @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
+     *                 @OA\Property(property="breed", type="string", example="Golden Retriever"),
+     *                 @OA\Property(property="color", type="string", example="Golden"),
+     *                 @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
+     *                 @OA\Property(property="description", type="string", example="A friendly and playful dog."),
+     *                 @OA\Property(property="photos", type="array",
+     *                     @OA\Items(type="string", example="https://example.com/photo1.jpg")
+     *                 ),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-12-01T10:00:00Z"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-12-01T10:00:00Z")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation Error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Dados inválidos."),
+     *             @OA\Property(property="data", type="null")
+     *         )
+     *     )
+     * )
      */
     public function update(UpdatePetRequest $request, Pet $pet)
     {
@@ -71,7 +301,38 @@ class PetController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * @OA\Delete(
+     *     path="/api/pets/{id}",
+     *     tags={"Pets"},
+     *     summary="Delete a pet",
+     *     description="Remove a pet from the database",
+     *  security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID of the pet to delete",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successfully deleted the pet",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Pet deletado com sucesso!"),
+     *             @OA\Property(property="data", type="null")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Pet not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Pet não encontrado."),
+     *             @OA\Property(property="data", type="null")
+     *         )
+     *     )
+     * )
      */
     public function destroy(Pet $pet)
     {
