@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\User\UserController;
 
 
 
@@ -24,4 +25,9 @@ Route::prefix('auth')->group(function () {
         Route::post('/refresh', [AuthController::class, 'refresh']);
         Route::get('/me', [AuthController::class, 'me']);
     });
+});
+
+Route::middleware('auth:sanctum')->prefix('users')->group(function () {
+    Route::put('/', [UserController::class, 'updateUser']);
+    Route::post('/photo/{user}', [UserController::class, 'updatePhoto']);
 });
