@@ -30,7 +30,7 @@ class RegisterRequest extends FormRequest
             'zip_code' => 'required|string|max:255',
             'number_house' => 'required|integer',
             'complement' => 'required|string|max:255',
-            'photo_url' => 'required|string|max:255',
+            'photo_url' => 'string|max:255',
         ];
     }
 
