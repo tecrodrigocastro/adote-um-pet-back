@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('zip_code');
             $table->integer('number_house');
             $table->string('complement');
-            $table->string('photo_url');
+            $table->string('photo_url')->nullable();
         });
     }
 
