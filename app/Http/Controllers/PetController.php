@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StorePetRequest;
 use App\Http\Requests\UpdatePetRequest;
 use App\Models\Pet;
+use Illuminate\Http\Request;
 
 /**
  * @OA\SecurityScheme(
@@ -24,8 +25,29 @@ class PetController extends Controller
      *     path="/api/pets",
      *     tags={"Pets"},
      *     summary="List all pets",
-     *     description="Fetch all pets from the database",
+     *     description="Fetch all pets from the database with optional filters",
      *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="query",
+     *         required=false,
+     *         description="Filter pets by type (e.g., Dog, Cat)",
+     *         @OA\Schema(type="string", example="Dog")
+     *     ),
+     *     @OA\Parameter(
+     *         name="gender",
+     *         in="query",
+     *         required=false,
+     *         description="Filter pets by gender (e.g., Male, Female)",
+     *         @OA\Schema(type="string", example="Male")
+     *     ),
+     *     @OA\Parameter(
+     *         name="size",
+     *         in="query",
+     *         required=false,
+     *         description="Filter pets by size (e.g., Small, Medium, Large)",
+     *         @OA\Schema(type="string", example="Medium")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successfully retrieved list of pets",
@@ -66,11 +88,27 @@ class PetController extends Controller
      *     )
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $pets = Pet::all();
 
-        return $this->success($pets, 'Busca realizada com sucesso!');
+        $pets = Pet::query()->where('status', 'unadopted');
+
+        if ($request->has('type')) {
+            $pets->where('type', $request->type);
+        }
+        if ($request->has('gender')) {
+            $pets->where('gender', $request->gender);
+        }
+
+        if ($request->has('size')) {
+            $pets->where('size', $request->size);
+        }
+
+        return $this->success(
+            $pets->get(),
+            'Busca realizada com sucesso!',
+            200
+        );
     }
 
     /**
@@ -216,9 +254,95 @@ class PetController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Pet $pet)
+    public function edit(Pet $pet) {}
+
+
+/**
+ * @OA\Post(
+ *     path="/api/pets/{id}/photos",
+ *     tags={"Pets"},
+ *     summary="Update photos of a pet",
+ *     description="Upload and update the photos of a specific pet.",
+ *     security={{"sanctum":{}}},
+ *     @OA\Parameter(
+ *         name="id",
+ *         in="path",
+ *         required=true,
+ *         description="ID of the pet whose photos are to be updated.",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ *     @OA\RequestBody(
+ *         required=true,
+ *         description="Array of photo files to upload",
+ *         @OA\MediaType(
+ *             mediaType="multipart/form-data",
+ *             @OA\Schema(
+ *                 @OA\Property(
+ *                     property="photos",
+ *                     type="array",
+ *                     @OA\Items(
+ *                         type="string",
+ *                         format="binary"
+ *                     )
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Photos updated successfully",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=true),
+ *             @OA\Property(property="message", type="string", example="Fotos atualizadas com sucesso!"),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="id", type="integer", example=1),
+ *                 @OA\Property(property="name", type="string", example="Buddy"),
+ *                 @OA\Property(property="photos", type="array",
+ *                     @OA\Items(type="string", example="pets/photo1.jpg")
+ *                 ),
+ *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-12-01T10:00:00Z"),
+ *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-12-02T10:00:00Z")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad request, no photos provided",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="No photos provided."),
+ *             @OA\Property(property="data", type="null")
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="Pet not found",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="success", type="boolean", example=false),
+ *             @OA\Property(property="message", type="string", example="Pet not found."),
+ *             @OA\Property(property="data", type="null")
+ *         )
+ *     )
+ * )
+ */
+    public function updatePhotos(Pet $pet, Request $request)
     {
-        //
+
+        if (!$request->hasFile('photos')) {
+            return $this->error('Nenhuma foto foi enviada!', 400);
+        }
+
+        if ($request->hasFile('photos')) {
+            $photos = [];
+            foreach ($request->file('photos') as $photo) {
+                $path = $photo->store('pets', 'public');
+                //$photos[] = asset('storage/' . $path);
+                $photos[] = $path;
+            }
+            $pet->photos = $photos;
+        }
+        $pet->save();
+        return $this->success($pet, 'Fotos atualizadas com sucesso!');
     }
 
     /**
