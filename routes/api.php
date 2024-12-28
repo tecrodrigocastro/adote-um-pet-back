@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Chat\ChatController;
+use App\Http\Controllers\Message\MessageController;
 use App\Http\Controllers\User\UserController;
 
 
@@ -31,4 +33,14 @@ Route::prefix('auth')->group(function () {
 Route::middleware('auth:sanctum')->prefix('users')->group(function () {
     Route::put('/', [UserController::class, 'updateUser']);
     Route::post('/photo/{user}', [UserController::class, 'updatePhoto']);
+});
+
+Route::middleware('auth:sanctum')->prefix('chats')->group(function () {
+    Route::get('/', [ChatController::class, 'index']);
+    Route::post('/', [ChatController::class, 'store']);
+});
+
+Route::middleware('auth:sanctum')->prefix('messages')->group(function () {
+    //Route::get('/', [ChatController::class, 'index']);
+    Route::post('/', [MessageController::class, 'store']);
 });
