@@ -24,6 +24,7 @@ class Pet extends Model
         'address',
         'description',
         'photos',
+        'status',
     ];
 
     protected $casts = [
