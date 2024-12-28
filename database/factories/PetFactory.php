@@ -31,7 +31,11 @@ class PetFactory extends Factory
             'color' => $this->faker->colorName,
             'address' => $this->faker->address,
             'description' => $this->faker->sentence,
-            'photos' => $this->faker->imageUrl(640, 480),
+            'photos' => [
+                $this->faker->imageUrl(640, 480),
+                $this->faker->imageUrl(640, 480),
+                $this->faker->imageUrl(640, 480)
+            ],
         ];
     }
 }
