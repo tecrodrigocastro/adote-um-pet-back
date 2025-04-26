@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Message;
 
+use App\Events\MessageSent;
 use App\Http\Controllers\Controller;
+use App\Models\Chat;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MessageController extends Controller
 {
@@ -56,10 +59,20 @@ class MessageController extends Controller
             'sender_id' => 'required|exists:users,id',
             'content' => 'required|string',
         ]);
+
+        $chat = Chat::findOrFail($request->chat_id);
+        if ($chat->adopter_id !== Auth::id() && $chat->owner_id !== Auth::id()) {
+            return $this->error('Não autorizado', 403);
+        }
+
         $user = $request->user();
         $is_me = $user->id == $request->sender_id;
 
         $message = Message::create($request->all());
+
+        $chat->touch('updated_at');
+
+        broadcast(new MessageSent($message))->toOthers();
 
         return $this->success([
             'message' => $message,

@@ -90,6 +90,7 @@ class PetController extends Controller
      */
     public function index(Request $request)
     {
+        //$perPage = $request->input('per_page', 15);
 
         $pets = Pet::query()->where('status', 'unadopted');
 
@@ -103,6 +104,8 @@ class PetController extends Controller
         if ($request->has('size')) {
             $pets->where('size', $request->size);
         }
+
+       // $paginatedPets = $pets->paginate($perPage);
 
         return $this->success(
             $pets->get(),
@@ -257,74 +260,74 @@ class PetController extends Controller
     public function edit(Pet $pet) {}
 
 
-/**
- * @OA\Post(
- *     path="/api/pets/{id}/photos",
- *     tags={"Pets"},
- *     summary="Update photos of a pet",
- *     description="Upload and update the photos of a specific pet.",
- *     security={{"sanctum":{}}},
- *     @OA\Parameter(
- *         name="id",
- *         in="path",
- *         required=true,
- *         description="ID of the pet whose photos are to be updated.",
- *         @OA\Schema(type="integer", example=1)
- *     ),
- *     @OA\RequestBody(
- *         required=true,
- *         description="Array of photo files to upload",
- *         @OA\MediaType(
- *             mediaType="multipart/form-data",
- *             @OA\Schema(
- *                 @OA\Property(
- *                     property="photos",
- *                     type="array",
- *                     @OA\Items(
- *                         type="string",
- *                         format="binary"
- *                     )
- *                 )
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Photos updated successfully",
- *         @OA\JsonContent(
- *             @OA\Property(property="success", type="boolean", example=true),
- *             @OA\Property(property="message", type="string", example="Fotos atualizadas com sucesso!"),
- *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="name", type="string", example="Buddy"),
- *                 @OA\Property(property="photos", type="array",
- *                     @OA\Items(type="string", example="pets/photo1.jpg")
- *                 ),
- *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-12-01T10:00:00Z"),
- *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-12-02T10:00:00Z")
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="Bad request, no photos provided",
- *         @OA\JsonContent(
- *             @OA\Property(property="success", type="boolean", example=false),
- *             @OA\Property(property="message", type="string", example="No photos provided."),
- *             @OA\Property(property="data", type="null")
- *         )
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="Pet not found",
- *         @OA\JsonContent(
- *             @OA\Property(property="success", type="boolean", example=false),
- *             @OA\Property(property="message", type="string", example="Pet not found."),
- *             @OA\Property(property="data", type="null")
- *         )
- *     )
- * )
- */
+    /**
+     * @OA\Post(
+     *     path="/api/pets/{id}/photos",
+     *     tags={"Pets"},
+     *     summary="Update photos of a pet",
+     *     description="Upload and update the photos of a specific pet.",
+     *     security={{"sanctum":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID of the pet whose photos are to be updated.",
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Array of photo files to upload",
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(
+     *                     property="photos",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="string",
+     *                         format="binary"
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Photos updated successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Fotos atualizadas com sucesso!"),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Buddy"),
+     *                 @OA\Property(property="photos", type="array",
+     *                     @OA\Items(type="string", example="pets/photo1.jpg")
+     *                 ),
+     *                 @OA\Property(property="created_at", type="string", format="date-time", example="2023-12-01T10:00:00Z"),
+     *                 @OA\Property(property="updated_at", type="string", format="date-time", example="2023-12-02T10:00:00Z")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad request, no photos provided",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="No photos provided."),
+     *             @OA\Property(property="data", type="null")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Pet not found",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Pet not found."),
+     *             @OA\Property(property="data", type="null")
+     *         )
+     *     )
+     * )
+     */
     public function updatePhotos(Pet $pet, Request $request)
     {
 

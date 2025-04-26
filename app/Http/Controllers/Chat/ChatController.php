@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ChatRequest;
 use App\Models\Chat;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
@@ -87,66 +87,101 @@ class ChatController extends Controller
         // 'owner_id' => 'required|exists:users,id',
         // 'pet_id' => 'required|exists:pets,id',
         $data = $request->validated();
-        $chats  = Chat::where('adopter_id', $data['adopter_id'])
-            ->where('owner_id', $data['owner_id'])
-            ->where('pet_id', $data['pet_id'])
-            ->with('pet:id,name,photos,status')
-            ->with('adopter:id,name,photo_url,email')
-            ->with('owner:id,name,photo_url,email')
-            ->with('messages')
-            ->get();
+        $chats = Chat::where(function ($query) {
+            $query->where('adopter_id', Auth::id())
+                ->orWhere('owner_id', Auth::id());
+        })
+            ->with([
+                'pet:id,name,photos,status',
+                'adopter:id,name,photo_url,email',
+                'owner:id,name,photo_url,email',
+                'messages' => function ($query) {
+                    $query->latest()->take(1);
+                }
+            ])
+            ->orderBy('updated_at', 'desc');
+        // ->paginate(10);
 
-        if ($chats->isEmpty()) {
+        if (!$chats) {
             return $this->error('Nenhum chat encontrado!', 404);
         }
 
-        return $this->success($chats);
+        return $this->success($chats->get());
     }
 
     /**
- * @OA\Post(
- *     path="/api/chats",
- *     summary="Create a new chat",
- *     description="Create a new chat record between an adopter and pet owner.",
- *     operationId="createChat",
- *     tags={"Chats"},
- *     security={{"bearerAuth":{}}},
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\JsonContent(
- *             required={"adopter_id", "owner_id", "pet_id"},
- *             @OA\Property(property="adopter_id", type="integer", example=5),
- *             @OA\Property(property="owner_id", type="integer", example=8),
- *             @OA\Property(property="pet_id", type="integer", example=10)
- *         )
- *     ),
- *     @OA\Response(
- *         response=201,
- *         description="Chat created successfully",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Chat criado com sucesso!"),
- *             @OA\Property(property="chat", type="object",
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="adopter_id", type="integer", example=5),
- *                 @OA\Property(property="owner_id", type="integer", example=8),
- *                 @OA\Property(property="pet_id", type="integer", example=10)
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="Validation error",
- *         @OA\JsonContent(
- *             @OA\Property(property="message", type="string", example="Invalid input data.")
- *         )
- *     )
- * )
- */
+     * @OA\Post(
+     *     path="/api/chats",
+     *     summary="Create a new chat",
+     *     description="Create a new chat record between an adopter and pet owner.",
+     *     operationId="createChat",
+     *     tags={"Chats"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"adopter_id", "owner_id", "pet_id"},
+     *             @OA\Property(property="adopter_id", type="integer", example=5),
+     *             @OA\Property(property="owner_id", type="integer", example=8),
+     *             @OA\Property(property="pet_id", type="integer", example=10)
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Chat created successfully",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Chat criado com sucesso!"),
+     *             @OA\Property(property="chat", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="adopter_id", type="integer", example=5),
+     *                 @OA\Property(property="owner_id", type="integer", example=8),
+     *                 @OA\Property(property="pet_id", type="integer", example=10)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Validation error",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Invalid input data.")
+     *         )
+     *     )
+     * )
+     */
     public function store(ChatRequest $request)
     {
-        $request->validated();
-        $chat = Chat::create($request->all());
+        $data =  $request->validated();
+        $existingChat = Chat::where('pet_id', $data['pet_id'])
+            ->where(function ($query) use ($data) {
+                $query->where(function ($q) use ($data) {
+                    $q->where('adopter_id', $data['adopter_id'])
+                        ->where('owner_id', $data['owner_id']);
+                })->orWhere(function ($q) use ($data) {
+                    $q->where('adopter_id', $data['owner_id'])
+                        ->where('owner_id', $data['adopter_id']);
+                });
+            })
+            ->first();
+
+        if ($existingChat) {
+            return $this->success($existingChat, 'Chat já existe');
+        }
+
+        $chat = Chat::create($data);
 
         return $this->success($chat, 'Chat criado com sucesso!', 201);
+    }
+
+    public function show(Chat $chat)
+    {
+        if ($chat->adopter_id !== Auth::id() && $chat->owner_id !== Auth::id()) {
+            return $this->error('Não autorizado', 403);
+        }
+
+        $chat->load(['pet', 'adopter', 'owner', 'messages' => function($query) {
+            $query->orderBy('created_at', 'desc')->paginate(20);
+        }]);
+
+        return $this->success($chat);
     }
 }
