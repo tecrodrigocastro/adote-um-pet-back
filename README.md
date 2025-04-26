@@ -1,66 +1,95 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="/public/images/logo.png" width="300" alt="Adote um pet Logo">
 </p>
 
-## About Laravel
+# Adote um Pet
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Adote um Pet** é uma plataforma completa para adoção de animais, conectando ONGs, protetores e adotantes. O sistema possui API RESTful, painel web e integração em tempo real com app mobile (Flutter).
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Funcionalidades
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- Cadastro e autenticação de usuários (incluindo social login)
+- Cadastro, listagem, filtro e busca de pets para adoção
+- Upload de fotos dos pets
+- Sistema de chat em tempo real (WebSocket via Laravel Reverb)
+- Cadastro e gerenciamento de ONGs/parceiros
+- Painel administrativo (web)
+- API documentada com Swagger/OpenAPI
+- Integração com app Flutter
 
-## Learning Laravel
+## Tecnologias
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- **Backend:** Laravel 11+, PHP 8.2+
+- **WebSocket:** Laravel Reverb
+- **API Auth:** Laravel Sanctum
+- **Banco de Dados:** MySQL ou PostgreSQL
+- **Frontend:** Blade + Tailwind + DaisyUI (web)
+- **Mobile:** Flutter (consome a API)
+- **Documentação:** OpenAPI/Swagger
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Instalação
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/tecrodrigocastro/adote_um_pet.git
+   cd adote_um_pet
+   ```
 
-## Laravel Sponsors
+2. Instale as dependências:
+   ```bash
+   composer install
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3. Copie o arquivo `.env.example` para `.env` e configure as variáveis de ambiente (DB, Reverb, etc):
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-### Premium Partners
+4. Execute as migrations:
+   ```bash
+   php artisan migrate
+   ```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+5. (Opcional) Popule o banco com dados fake:
+   ```bash
+   php artisan db:seed
+   ```
 
-## Contributing
+6. Inicie o servidor Laravel:
+   ```bash
+   php artisan serve
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+7. Inicie o servidor WebSocket (Reverb):
+   ```bash
+   php artisan reverb:start
+   ```
 
-## Code of Conduct
+## Como testar o WebSocket
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Certifique-se de que o servidor Reverb está rodando (`php artisan reverb:start`)
+- Use o app Flutter ou Laravel Echo (web) para se conectar ao canal privado do chat
+- Mensagens enviadas via API aparecerão em tempo real para todos conectados ao mesmo chat
 
-## Security Vulnerabilities
+## Documentação da API
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+A documentação dos endpoints está disponível via Swagger/OpenAPI nas anotações dos controllers.
 
-## License
+## Estrutura de Diretórios
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+- `app/Http/Controllers/Chat/ChatController.php` — Gerencia os chats
+- `app/Http/Controllers/Message/MessageController.php` — Gerencia as mensagens
+- `app/Events/MessageSent.php` — Evento broadcast de mensagem
+- `resources/views/welcome.blade.php` — Landing page web
+- `config/reverb.php` — Configuração do WebSocket
+
+## Contribuição
+
+Contribuições são bem-vindas! Abra uma issue ou envie um pull request.
+
+## Licença
+
+MIT
+
+---
