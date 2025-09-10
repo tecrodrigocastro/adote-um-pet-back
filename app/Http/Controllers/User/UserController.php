@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use App\Http\Requests\UpdatePhotoRequest;
+use Illuminate\Http\Request;
 
 /**
  * @OA\Tag(
@@ -22,9 +21,12 @@ class UserController extends Controller
      *     summary="Update user profile",
      *     description="Update the authenticated user's profile information",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="name", type="string", example="John Doe"),
      *             @OA\Property(property="email", type="string", format="email", example="john@example.com"),
      *             @OA\Property(property="password", type="string", format="password", example="newpassword123"),
@@ -35,10 +37,13 @@ class UserController extends Controller
      *             @OA\Property(property="complement", type="string", example="Apt 4B")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="User updated successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Usuário atualizado com sucesso!"),
      *             @OA\Property(property="data", type="object",
@@ -56,19 +61,25 @@ class UserController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Unauthorized"),
      *             @OA\Property(property="data", type="null")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation Error",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="The given data was invalid."),
      *             @OA\Property(property="data", type="null")
@@ -80,13 +91,21 @@ class UserController extends Controller
     {
         $user = $request->user();
 
-        $data = $request->all();
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|string|email|max:255|unique:users,email,'.$user->id,
+            'password' => 'sometimes|required|string|min:6',
+            'phone' => 'sometimes|required|string|max:255',
+        ]);
 
-        if ($request->has('password')) {
-            $data['password'] = bcrypt($data['password']);
+        if (isset($validated['password'])) {
+            $validated['password'] = bcrypt($validated['password']);
         }
 
-        $user->update($data);
+        $user->update($validated);
+
+        // Carregar endereços para retornar
+        $user->load('addresses');
 
         return $this->success($user, 'Usuário atualizado com sucesso!', 200);
     }
@@ -98,11 +117,15 @@ class UserController extends Controller
      *     summary="Update user profile photo",
      *     description="Update the authenticated user's profile photo",
      *     security={{"sanctum":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
+     *
      *             @OA\Schema(
+     *
      *                 @OA\Property(
      *                     property="photo_url",
      *                     type="string",
@@ -112,10 +135,13 @@ class UserController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Photo updated successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="message", type="string", example="Foto atualizada com sucesso!"),
      *             @OA\Property(property="data", type="object",
@@ -133,19 +159,25 @@ class UserController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=401,
      *         description="Unauthorized",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="Unauthorized"),
      *             @OA\Property(property="data", type="null")
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=422,
      *         description="Validation Error",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="success", type="boolean", example=false),
      *             @OA\Property(property="message", type="string", example="The given data was invalid."),
      *             @OA\Property(property="data", type="null")
