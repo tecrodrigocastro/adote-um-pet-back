@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Chat extends Model
 {
-
     protected $fillable = [
         'adopter_id',
         'owner_id',

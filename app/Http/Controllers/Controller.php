@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 abstract class Controller
 {
-    public function success(mixed $data, string $message = "okay", int $statusCode = 200)
+    public function success(mixed $data, string $message = 'okay', int $statusCode = 200)
     {
         return response()->json([
             'success' => true,
@@ -12,7 +12,6 @@ abstract class Controller
             'data' => $data,
         ], $statusCode);
     }
-
 
     public function error(string $message, int $statusCode = 400)
     {

@@ -3,9 +3,7 @@
 namespace App\Events;
 
 use App\Models\Message;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -33,7 +31,7 @@ class MessageSent implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('chat.' . $this->message->chat_id),
+            new PrivateChannel('chat.'.$this->message->chat_id),
         ];
     }
 
@@ -41,7 +39,7 @@ class MessageSent implements ShouldBroadcast
     {
         return [
             'message' => $this->message->load('user:id,name,photo_url'),
-            'is_me' => false
+            'is_me' => false,
         ];
     }
 }
