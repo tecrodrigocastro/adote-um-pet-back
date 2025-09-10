@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Chat;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChatRequest;
 use App\Models\Chat;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
@@ -17,38 +16,49 @@ class ChatController extends Controller
      *     description="Retrieve a list of chats between adopters and pet owners based on the provided adopter, owner, and pet IDs. Returns chat details, including pet, adopter, and owner information, as well as messages.",
      *     tags={"Chats"},
      *     security={{"sanctum":{}}},
+     *
      *     @OA\Parameter(
      *         name="adopter_id",
      *         in="query",
      *         required=true,
      *         description="ID of the adopter",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="owner_id",
      *         in="query",
      *         required=true,
      *         description="ID of the pet owner",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Parameter(
      *         name="pet_id",
      *         in="query",
      *         required=true,
      *         description="ID of the pet",
+     *
      *         @OA\Schema(type="integer")
      *     ),
+     *
      *     @OA\Response(
      *         response=200,
      *         description="Chat details retrieved successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="id", type="integer", example=1),
      *             @OA\Property(property="pet", type="object",
      *                 @OA\Property(property="id", type="integer", example=10),
      *                 @OA\Property(property="name", type="string", example="Buddy"),
      *                 @OA\Property(property="photos", type="array",
+     *
      *                     @OA\Items(type="string", example="https://example.com/photo.jpg")
      *                 ),
+     *
      *                 @OA\Property(property="status", type="string", example="available")
      *             ),
      *             @OA\Property(property="adopter", type="object",
@@ -64,7 +74,9 @@ class ChatController extends Controller
      *                 @OA\Property(property="email", type="string", example="jane.smith@example.com")
      *             ),
      *             @OA\Property(property="messages", type="array",
+     *
      *                 @OA\Items(
+     *
      *                     @OA\Property(property="id", type="integer", example=101),
      *                     @OA\Property(property="content", type="string", example="Hello!"),
      *                     @OA\Property(property="created_at", type="string", format="date-time", example="2024-12-01T12:00:00Z")
@@ -72,10 +84,13 @@ class ChatController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=404,
      *         description="No chat found",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="message", type="string", example="Nenhum chat encontrado!")
      *         )
      *     )
@@ -97,12 +112,12 @@ class ChatController extends Controller
                 'owner:id,name,photo_url,email',
                 'messages' => function ($query) {
                     $query->latest()->take(1);
-                }
+                },
             ])
             ->orderBy('updated_at', 'desc');
         // ->paginate(10);
 
-        if (!$chats) {
+        if (! $chats) {
             return $this->error('Nenhum chat encontrado!', 404);
         }
 
@@ -117,19 +132,25 @@ class ChatController extends Controller
      *     operationId="createChat",
      *     tags={"Chats"},
      *     security={{"bearerAuth":{}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"adopter_id", "owner_id", "pet_id"},
+     *
      *             @OA\Property(property="adopter_id", type="integer", example=5),
      *             @OA\Property(property="owner_id", type="integer", example=8),
      *             @OA\Property(property="pet_id", type="integer", example=10)
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=201,
      *         description="Chat created successfully",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="message", type="string", example="Chat criado com sucesso!"),
      *             @OA\Property(property="chat", type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
@@ -139,10 +160,13 @@ class ChatController extends Controller
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(
      *         response=400,
      *         description="Validation error",
+     *
      *         @OA\JsonContent(
+     *
      *             @OA\Property(property="message", type="string", example="Invalid input data.")
      *         )
      *     )
@@ -150,7 +174,7 @@ class ChatController extends Controller
      */
     public function store(ChatRequest $request)
     {
-        $data =  $request->validated();
+        $data = $request->validated();
         $existingChat = Chat::where('pet_id', $data['pet_id'])
             ->where(function ($query) use ($data) {
                 $query->where(function ($q) use ($data) {
@@ -178,10 +202,15 @@ class ChatController extends Controller
             return $this->error('Não autorizado', 403);
         }
 
-        $chat->load(['pet', 'adopter', 'owner', 'messages' => function($query) {
-            $query->orderBy('created_at', 'desc')->paginate(20);
-        }]);
+        $chat->load(['pet', 'adopter', 'owner']);
 
-        return $this->success($chat);
+        $messages = $chat->messages()
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return $this->success([
+            'chat' => $chat,
+            'messages' => $messages,
+        ]);
     }
 }
