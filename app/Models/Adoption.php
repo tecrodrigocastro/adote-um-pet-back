@@ -10,12 +10,13 @@ class Adoption extends Model
     /** @use HasFactory<\Database\Factories\AdoptionFactory> */
     use HasFactory;
 
-
     protected $fillable = [
         'pet_id',
         'adopter_id',
         'owner_id',
         'adoption_date',
+        'status',
+        'message',
     ];
 
     protected $dates = [
