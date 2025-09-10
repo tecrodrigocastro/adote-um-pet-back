@@ -10,6 +10,8 @@ class Message extends Model
         'chat_id',
         'sender_id',
         'content',
+        'read_at',
+        'message_type',
     ];
 
     public function chat()
@@ -20,5 +22,25 @@ class Message extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    public function isSentBy(int $userId): bool
+    {
+        return $this->sender_id === $userId;
+    }
+
+    public function markAsRead()
+    {
+        $this->update(['read_at' => now()]);
+    }
+
+    public function isRead(): bool
+    {
+        return !is_null($this->read_at);
     }
 }

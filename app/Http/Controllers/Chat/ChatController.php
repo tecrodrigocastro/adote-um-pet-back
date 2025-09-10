@@ -13,36 +13,10 @@ class ChatController extends Controller
      * @OA\Get(
      *     path="/api/chats",
      *     summary="Get chat list",
-     *     description="Retrieve a list of chats between adopters and pet owners based on the provided adopter, owner, and pet IDs. Returns chat details, including pet, adopter, and owner information, as well as messages.",
+     *     description="Retrieve a list of chats for the authenticated user. Returns chat details, including pet, adopter, and owner information, as well as the latest message.",
      *     tags={"Chats"},
      *     security={{"sanctum":{}}},
      *
-     *     @OA\Parameter(
-     *         name="adopter_id",
-     *         in="query",
-     *         required=true,
-     *         description="ID of the adopter",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="owner_id",
-     *         in="query",
-     *         required=true,
-     *         description="ID of the pet owner",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
-     *
-     *     @OA\Parameter(
-     *         name="pet_id",
-     *         in="query",
-     *         required=true,
-     *         description="ID of the pet",
-     *
-     *         @OA\Schema(type="integer")
-     *     ),
      *
      *     @OA\Response(
      *         response=200,
@@ -96,12 +70,8 @@ class ChatController extends Controller
      *     )
      * )
      */
-    public function index(ChatRequest $request)
+    public function index()
     {
-        // 'adopter_id' => 'required|exists:users,id',
-        // 'owner_id' => 'required|exists:users,id',
-        // 'pet_id' => 'required|exists:pets,id',
-        $data = $request->validated();
         $chats = Chat::where(function ($query) {
             $query->where('adopter_id', Auth::id())
                 ->orWhere('owner_id', Auth::id());
@@ -114,14 +84,10 @@ class ChatController extends Controller
                     $query->latest()->take(1);
                 },
             ])
-            ->orderBy('updated_at', 'desc');
-        // ->paginate(10);
+            ->orderBy('updated_at', 'desc')
+            ->get();
 
-        if (! $chats) {
-            return $this->error('Nenhum chat encontrado!', 404);
-        }
-
-        return $this->success($chats->get());
+        return $this->success($chats);
     }
 
     /**

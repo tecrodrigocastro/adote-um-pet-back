@@ -31,4 +31,27 @@ class Chat extends Model
     {
         return $this->hasMany(Message::class, 'chat_id');
     }
+
+    public function latestMessage()
+    {
+        return $this->hasOne(Message::class, 'chat_id')->latest();
+    }
+
+    public function hasParticipant(int $userId): bool
+    {
+        return $this->adopter_id === $userId || $this->owner_id === $userId;
+    }
+
+    public function getOtherParticipant(int $userId)
+    {
+        if ($this->adopter_id === $userId) {
+            return $this->owner;
+        }
+        
+        if ($this->owner_id === $userId) {
+            return $this->adopter;
+        }
+        
+        return null;
+    }
 }
