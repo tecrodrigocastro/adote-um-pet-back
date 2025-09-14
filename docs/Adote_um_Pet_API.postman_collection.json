@@ -1,0 +1,1382 @@
+{
+	"info": {
+		"_postman_id": "12345678-1234-1234-1234-123456789012",
+		"name": "Adote um Pet API - Completa",
+		"description": "Collection completa da API Adote um Pet com foco em funcionalidades das ONGs.\n\n**Base URL:** http://localhost:8001\n**WebSocket URL:** ws://localhost:8080\n\n**Autenticação:** Bearer Token (Sanctum)\n\n## Como usar:\n1. Execute \"Auth > Login\" para obter o token\n2. O token será automaticamente salvo como variável\n3. Use os outros endpoints normalmente\n\n## WebSocket (Chat Tempo Real):\n- **Host:** localhost:8080\n- **Channels:** private-chat.{chat_id}\n- **Events:** App\\Events\\MessageSent\n- **Lib:** pusher-js ou similar\n- **Auth:** Bearer token nos headers\n\n## Funcionalidades ONGs:\n- Cadastro e gestão de organizações  \n- Sistema de voluntários com permissões\n- Dashboard com estatísticas\n- Gestão de pets (SEM campo address)\n- Chat em tempo real via WebSocket\n- Sistema de adoções completo\n\n## Status dos Endpoints:\n✅ Todos implementados e testados\n✅ Sistema de permissões funcional  \n✅ WebSocket/Reverb configurado\n✅ Validações de segurança\n✅ Campo address removido dos pets",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "🔐 Authentication",
+			"item": [
+				{
+					"name": "Register Individual User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"João Silva\",\n    \"email\": \"joao@exemplo.com\",\n    \"password\": \"password123\",\n    \"phone\": \"(11) 99999-9999\",\n    \"photo_url\": \"https://via.placeholder.com/150\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						},
+						"description": "Cadastro de usuário individual (pessoa física)"
+					}
+				},
+				{
+					"name": "Register Organization (ONG)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"contato@ongamigos.org\",\n    \"password\": \"password123\",\n    \"organization_name\": \"ONG Amigos dos Animais\",\n    \"cnpj\": \"12345678000195\",\n    \"responsible_name\": \"Maria Santos\",\n    \"phone\": \"(11) 98888-8888\",\n    \"mission_statement\": \"Resgatamos e cuidamos de animais abandonados, promovendo adoções responsáveis e conscientização sobre o bem-estar animal.\",\n    \"website\": \"https://ongamigos.org\",\n    \"social_media\": {\n        \"facebook\": \"https://facebook.com/ongamigos\",\n        \"instagram\": \"https://instagram.com/ongamigos\",\n        \"twitter\": \"https://twitter.com/ongamigos\"\n    },\n    \"address\": {\n        \"street\": \"Rua das Flores, 123\",\n        \"neighborhood\": \"Centro\",\n        \"number_house\": 123,\n        \"complement\": \"Sala 101\",\n        \"zip_code\": \"01234-567\",\n        \"city\": \"São Paulo\",\n        \"state\": \"SP\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register/organization",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"register",
+								"organization"
+							]
+						},
+						"description": "Cadastro de organização (ONG) com dados completos"
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const response = pm.response.json();",
+									"    if (response.success && response.data.access_token) {",
+									"        pm.collectionVariables.set('auth_token', response.data.access_token);",
+									"        pm.collectionVariables.set('user_id', response.data.user.id);",
+									"        pm.collectionVariables.set('user_type', response.data.user.user_type);",
+									"        console.log('Token salvo automaticamente!');",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"contato@ongamigos.org\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login que salva automaticamente o token para uso nos outros endpoints"
+					}
+				},
+				{
+					"name": "Get User Info",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						},
+						"description": "Obter informações do usuário autenticado"
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"logout"
+							]
+						},
+						"description": "Logout do usuário"
+					}
+				}
+			],
+			"description": "Endpoints de autenticação para usuários e organizações"
+		},
+		{
+			"name": "🏢 Organizations (ONGs)",
+			"item": [
+				{
+					"name": "List Organizations (Public)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/organizations?search=amigos&city=São Paulo&per_page=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "amigos",
+									"description": "Buscar por nome ou missão"
+								},
+								{
+									"key": "city",
+									"value": "São Paulo",
+									"description": "Filtrar por cidade"
+								},
+								{
+									"key": "state",
+									"value": "SP",
+									"description": "Filtrar por estado",
+									"disabled": true
+								},
+								{
+									"key": "per_page",
+									"value": "10",
+									"description": "Itens por página"
+								}
+							]
+						},
+						"description": "Listar organizações públicas verificadas com filtros"
+					}
+				},
+				{
+					"name": "Get Organization Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/organizations/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations",
+								"{{user_id}}"
+							]
+						},
+						"description": "Obter detalhes públicos de uma organização"
+					}
+				},
+				{
+					"name": "Update Organization",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"organization_name\": \"ONG Amigos dos Animais Atualizada\",\n    \"responsible_name\": \"Maria Santos Silva\",\n    \"phone\": \"(11) 98888-7777\",\n    \"mission_statement\": \"Resgatamos, cuidamos e encontramos lares para animais abandonados, promovendo adoções responsáveis e educação sobre bem-estar animal.\",\n    \"website\": \"https://novosite.ongamigos.org\",\n    \"social_media\": {\n        \"facebook\": \"https://facebook.com/ongamigos\",\n        \"instagram\": \"https://instagram.com/ongamigos\",\n        \"twitter\": \"https://twitter.com/ongamigos\",\n        \"linkedin\": \"https://linkedin.com/company/ongamigos\"\n    }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/organizations/{{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations",
+								"{{user_id}}"
+							]
+						},
+						"description": "Atualizar dados da organização (apenas admins)"
+					}
+				},
+				{
+					"name": "Get Organization Statistics",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/organizations/{{user_id}}/statistics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations",
+								"{{user_id}}",
+								"statistics"
+							]
+						},
+						"description": "Dashboard com estatísticas da organização (pets, adoções, voluntários)"
+					}
+				},
+				{
+					"name": "Verify Organization (Admin Only)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/organizations/{{user_id}}/verify",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations",
+								"{{user_id}}",
+								"verify"
+							]
+						},
+						"description": "Verificar organização (apenas administradores do sistema)"
+					}
+				},
+				{
+					"name": "Get Organization Pets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/organizations/{{user_id}}/pets?status=unadopted&type=dog&per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations",
+								"{{user_id}}",
+								"pets"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "unadopted",
+									"description": "Filtrar por status (unadopted, adopted, pending)"
+								},
+								{
+									"key": "type",
+									"value": "dog",
+									"description": "Filtrar por tipo (dog, cat, rabbit, bird)"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"description": "Itens por página"
+								}
+							]
+						},
+						"description": "Listar pets de uma organização específica"
+					}
+				}
+			],
+			"description": "Gestão de organizações (ONGs)"
+		},
+		{
+			"name": "👥 Volunteers Management",
+			"item": [
+				{
+					"name": "List Organization Volunteers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/organizations/{{user_id}}/volunteers?role=admin&active=true&per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations",
+								"{{user_id}}",
+								"volunteers"
+							],
+							"query": [
+								{
+									"key": "role",
+									"value": "admin",
+									"description": "Filtrar por papel (admin, manager, volunteer)"
+								},
+								{
+									"key": "active",
+									"value": "true",
+									"description": "Filtrar por status ativo"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"description": "Itens por página"
+								}
+							]
+						},
+						"description": "Listar voluntários da organização"
+					}
+				},
+				{
+					"name": "Invite Volunteer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"volunteer_id\": 2,\n    \"role\": \"manager\",\n    \"permissions\": [\n        \"create_pets\",\n        \"edit_pets\",\n        \"approve_adoptions\",\n        \"view_reports\"\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/organizations/{{user_id}}/volunteers/invite",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations",
+								"{{user_id}}",
+								"volunteers",
+								"invite"
+							]
+						},
+						"description": "Convidar voluntário para organização com permissões específicas\n\n**Roles disponíveis:**\n- admin: Controle total\n- manager: Gestão operacional\n- volunteer: Operação básica\n\n**Permissões:**\n- manage_volunteers\n- approve_adoptions\n- create_pets\n- edit_pets\n- delete_pets\n- view_reports\n- configure_organization"
+					}
+				},
+				{
+					"name": "Get Volunteer Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/organizations/{{user_id}}/volunteers/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations",
+								"{{user_id}}",
+								"volunteers",
+								"1"
+							]
+						},
+						"description": "Obter detalhes de um voluntário específico"
+					}
+				},
+				{
+					"name": "Update Volunteer Role",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"role\": \"admin\",\n    \"permissions\": [\n        \"manage_volunteers\",\n        \"approve_adoptions\",\n        \"create_pets\",\n        \"edit_pets\",\n        \"delete_pets\",\n        \"view_reports\",\n        \"configure_organization\"\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/organizations/{{user_id}}/volunteers/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations",
+								"{{user_id}}",
+								"volunteers",
+								"1"
+							]
+						},
+						"description": "Atualizar papel e permissões de um voluntário"
+					}
+				},
+				{
+					"name": "Remove Volunteer",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/organizations/{{user_id}}/volunteers/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations",
+								"{{user_id}}",
+								"volunteers",
+								"1"
+							]
+						},
+						"description": "Remover voluntário da organização (soft delete)"
+					}
+				},
+				{
+					"name": "Leave Organization",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/organizations/{{user_id}}/volunteers/leave",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"organizations",
+								"{{user_id}}",
+								"volunteers",
+								"leave"
+							]
+						},
+						"description": "Sair da organização como voluntário"
+					}
+				},
+				{
+					"name": "My Organizations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/volunteers/my-organizations",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"volunteers",
+								"my-organizations"
+							]
+						},
+						"description": "Listar organizações onde sou voluntário"
+					}
+				}
+			],
+			"description": "Sistema de gestão de voluntários com permissões granulares"
+		},
+		{
+			"name": "🐾 Pets Management",
+			"item": [
+				{
+					"name": "List Pets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/pets?type=dog&gender=male&size=medium&per_page=20",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pets"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "dog",
+									"description": "Filtrar por tipo (dog, cat, rabbit, bird, other)"
+								},
+								{
+									"key": "gender",
+									"value": "male",
+									"description": "Filtrar por gênero (male, female, unknown)"
+								},
+								{
+									"key": "size",
+									"value": "medium",
+									"description": "Filtrar por tamanho (small, medium, large, unknown)"
+								},
+								{
+									"key": "per_page",
+									"value": "20",
+									"description": "Itens por página (máx 100)"
+								}
+							]
+						},
+						"description": "Listar pets disponíveis para adoção com filtros"
+					}
+				},
+				{
+					"name": "Create Pet",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Buddy\",\n    \"type\": \"dog\",\n    \"gender\": \"male\",\n    \"size\": \"medium\",\n    \"birth_date\": \"2022-06-15\",\n    \"breed\": \"Labrador Mix\",\n    \"color\": \"Dourado\",\n    \"description\": \"Buddy é um cão muito carinhoso e brincalhão, ideal para famílias com crianças. Ele adora passear no parque e brincar com outros cães.\",\n    \"photos\": [\n        \"https://via.placeholder.com/400x300?text=Buddy+1\",\n        \"https://via.placeholder.com/400x300?text=Buddy+2\",\n        \"https://via.placeholder.com/400x300?text=Buddy+3\"\n    ],\n    \"organization_id\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/pets",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pets"
+							]
+						},
+						"description": "Cadastrar novo pet para adoção\n\n**✅ ATUALIZADO:** Campo 'address' foi removido! O endereço do pet é o endereço da ONG/pessoa responsável.\n\n**Para ONGs:** deixe organization_id null ou informe o ID da organização\n**Para indivíduos:** sempre null\n\n**Campos obrigatórios:**\n- name, type, gender, size, description, photos\n\n**Campos opcionais:**  \n- birth_date, breed, color, organization_id"
+					}
+				},
+				{
+					"name": "Get Pet Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/pets/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pets",
+								"1"
+							]
+						},
+						"description": "Obter detalhes completos de um pet"
+					}
+				},
+				{
+					"name": "Update Pet",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Buddy Atualizado\",\n    \"description\": \"Buddy é um cão extremamente carinhoso, brincalhão e sociável. Ideal para famílias com crianças e outros pets. Já foi vacinado e castrado.\",\n    \"breed\": \"Labrador Retriever Mix\",\n    \"color\": \"Dourado com manchas brancas\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/pets/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pets",
+								"1"
+							]
+						},
+						"description": "Atualizar dados do pet (apenas proprietário ou voluntários com permissão)"
+					}
+				},
+				{
+					"name": "Update Pet Photos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"photos\": [\n        \"https://via.placeholder.com/400x300?text=Buddy+New+1\",\n        \"https://via.placeholder.com/400x300?text=Buddy+New+2\",\n        \"https://via.placeholder.com/400x300?text=Buddy+New+3\",\n        \"https://via.placeholder.com/400x300?text=Buddy+New+4\"\n    ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/pets/1/photos",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pets",
+								"1",
+								"photos"
+							]
+						},
+						"description": "Atualizar fotos do pet"
+					}
+				},
+				{
+					"name": "Delete Pet",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/pets/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"pets",
+								"1"
+							]
+						},
+						"description": "Remover pet (soft delete)"
+					}
+				}
+			],
+			"description": "Gestão de pets para adoção"
+		},
+		{
+			"name": "💕 Adoption System",
+			"item": [
+				{
+					"name": "Request Adoption",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"message\": \"Olá! Tenho muito interesse em adotar o Buddy. Tenho experiência com cães e uma casa com quintal grande. Posso oferecer muito amor e cuidado. Quando posso conhecê-lo pessoalmente?\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/adoptions/pets/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"adoptions",
+								"pets",
+								"1"
+							]
+						},
+						"description": "Solicitar adoção de um pet específico"
+					}
+				},
+				{
+					"name": "List My Adoption Requests",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/adoptions/my/requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"adoptions",
+								"my",
+								"requests"
+							]
+						},
+						"description": "Listar minhas solicitações de adoção"
+					}
+				},
+				{
+					"name": "List Received Requests (ONG)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/adoptions/received/requests",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"adoptions",
+								"received",
+								"requests"
+							]
+						},
+						"description": "Listar solicitações de adoção recebidas (para ONGs/proprietários)"
+					}
+				},
+				{
+					"name": "Approve Adoption",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/adoptions/1/approve",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"adoptions",
+								"1",
+								"approve"
+							]
+						},
+						"description": "Aprovar solicitação de adoção (rejeita automaticamente outras)"
+					}
+				},
+				{
+					"name": "Reject Adoption",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/adoptions/1/reject",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"adoptions",
+								"1",
+								"reject"
+							]
+						},
+						"description": "Rejeitar solicitação de adoção"
+					}
+				},
+				{
+					"name": "Get Adoption Details",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/adoptions/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"adoptions",
+								"1"
+							]
+						},
+						"description": "Obter detalhes de uma adoção específica"
+					}
+				}
+			],
+			"description": "Sistema completo de adoção com aprovação/rejeição"
+		},
+		{
+			"name": "💬 Chat System",
+			"item": [
+				{
+					"name": "List Chats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/chats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"chats"
+							]
+						},
+						"description": "Listar todos os chats do usuário autenticado"
+					}
+				},
+				{
+					"name": "Create Chat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"pet_id\": 1,\n    \"owner_id\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/chats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"chats"
+							]
+						},
+						"description": "Criar novo chat entre adotante e proprietário"
+					}
+				},
+				{
+					"name": "Get Chat with Messages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/chats/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"chats",
+								"1"
+							]
+						},
+						"description": "Obter chat específico com mensagens paginadas"
+					}
+				},
+				{
+					"name": "Send Message",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"chat_id\": 1,\n    \"content\": \"Olá! Obrigado pelo interesse em adotar o Buddy. Ele realmente é um cão maravilhoso! Quando você gostaria de conhecê-lo pessoalmente? Estamos disponíveis no final de semana.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/messages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"messages"
+							]
+						},
+						"description": "Enviar mensagem no chat (dispara WebSocket automaticamente)"
+					}
+				},
+				{
+					"name": "Mark Chat as Read",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/chats/1/mark-read",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"chats",
+								"1",
+								"mark-read"
+							]
+						},
+						"description": "Marcar todas as mensagens do chat como lidas"
+					}
+				}
+			],
+			"description": "Sistema de chat em tempo real com WebSocket (Reverb)"
+		},
+		{
+			"name": "🌐 WebSocket Setup",
+			"item": [
+				{
+					"name": "📋 WebSocket Configuration",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/websocket-info",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"websocket-info"
+							]
+						},
+						"description": "**⚠️ Este não é um endpoint real - apenas instruções!**\n\n## 🔧 Configuração WebSocket (Reverb)\n\n### **Conexão JavaScript:**\n```javascript\nconst pusher = new Pusher('bloxwlokqhk79ytuis5q', {\n    wsHost: 'localhost',\n    wsPort: 8080,\n    wssPort: 8080,\n    forceTLS: false,\n    encrypted: false,\n    disableStats: true,\n    enabledTransports: ['ws', 'wss'],\n    cluster: 'mt1',\n    auth: {\n        headers: {\n            'Authorization': `Bearer ${authToken}`\n        }\n    }\n});\n```\n\n### **Inscrever-se em um Chat:**\n```javascript\n// Canal privado para chat específico\nconst channel = pusher.subscribe('private-chat.1');\n\n// Escutar mensagens\nchannel.bind('App\\\\Events\\\\MessageSent', (data) => {\n    console.log('Nova mensagem:', data.message);\n    // Atualizar interface do chat\n});\n```\n\n### **Como Testar:**\n1. ✅ Faça login e obtenha o token\n2. ✅ Use \"Chat > Send Message\" para enviar mensagem\n3. ✅ A mensagem será enviada via WebSocket automaticamente\n4. ✅ Outros participantes do chat receberão em tempo real\n\n### **Comandos Terminal:**\n```bash\n# Terminal 1 - Laravel\nphp artisan serve --port=8001\n\n# Terminal 2 - Reverb WebSocket  \nphp artisan reverb:start --host=0.0.0.0 --port=8080\n\n# Terminal 3 - Queue Worker\nphp artisan queue:work\n```\n\n### **URLs Importantes:**\n- **API:** http://localhost:8001\n- **WebSocket:** ws://localhost:8080  \n- **Documentação:** http://localhost:8001/api/documentation"
+					}
+				}
+			],
+			"description": "Instruções e configurações para WebSocket (Reverb)"
+		},
+		{
+			"name": "📍 Address Management",
+			"item": [
+				{
+					"name": "List User Addresses",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/addresses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"addresses"
+							]
+						},
+						"description": "Listar endereços do usuário"
+					}
+				},
+				{
+					"name": "Create Address",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"street\": \"Rua das Palmeiras, 456\",\n    \"neighborhood\": \"Vila Olímpia\",\n    \"number_house\": 456,\n    \"complement\": \"Bloco B, Apt 201\",\n    \"zip_code\": \"04547-001\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/addresses",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"addresses"
+							]
+						},
+						"description": "Criar novo endereço"
+					}
+				},
+				{
+					"name": "Update Address",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{auth_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"street\": \"Rua das Palmeiras, 456\",\n    \"neighborhood\": \"Vila Olímpia\",\n    \"number_house\": 456,\n    \"complement\": \"Bloco B, Apt 202 - Atualizado\",\n    \"zip_code\": \"04547-001\",\n    \"city\": \"São Paulo\",\n    \"state\": \"SP\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/addresses/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"addresses",
+								"1"
+							]
+						},
+						"description": "Atualizar endereço existente"
+					}
+				}
+			],
+			"description": "Gestão de endereços dos usuários"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8001",
+			"type": "string"
+		},
+		{
+			"key": "auth_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "user_type",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
