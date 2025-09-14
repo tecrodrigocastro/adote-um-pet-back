@@ -74,7 +74,7 @@ class User extends Authenticatable
 
     public function receivedAdoptionRequests()
     {
-        return $this->hasManyThrough(Adoption::class, Pet::class, 'user_id', 'pet_id');
+        return $this->hasMany(Adoption::class, 'owner_id');
     }
 
     public function ownedPets()

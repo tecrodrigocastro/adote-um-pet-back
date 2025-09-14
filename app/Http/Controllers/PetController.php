@@ -77,7 +77,6 @@ class PetController extends Controller
      *                     @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
      *                     @OA\Property(property="breed", type="string", example="Golden Retriever"),
      *                     @OA\Property(property="color", type="string", example="Golden"),
-     *                     @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
      *                     @OA\Property(property="description", type="string", example="A friendly and playful dog."),
      *                     @OA\Property(property="photos", type="array",
      *
@@ -146,30 +145,39 @@ class PetController extends Controller
      *     path="/api/pets",
      *     tags={"Pets"},
      *     summary="Create a new pet",
-     *     description="Create a new pet and store it in the database",
+     *     description="Create a new pet and store it in the database with image file uploads",
      *     security={{"sanctum":{}}},
      *
      *     @OA\RequestBody(
      *         required=true,
+     *         description="Pet registration data with image files",
      *
-     *         @OA\JsonContent(
-     *             required={"name", "type", "user_id", "gender", "size", "address", "description", "photos"},
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
      *
-     *             @OA\Property(property="name", type="string", example="Buddy"),
-     *             @OA\Property(property="type", type="string", example="Dog"),
-     *             @OA\Property(property="user_id", type="integer", example=1),
-     *             @OA\Property(property="gender", type="string", example="Male"),
-     *             @OA\Property(property="size", type="string", example="Medium"),
-     *             @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
-     *             @OA\Property(property="breed", type="string", example="Golden Retriever"),
-     *             @OA\Property(property="color", type="string", example="Golden"),
-     *             @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
-     *             @OA\Property(property="description", type="string", example="A friendly and playful dog."),
-     *             @OA\Property(property="photos", type="array",
+     *             @OA\Schema(
+     *                 required={"name", "type", "gender", "size", "description", "photos"},
      *
-     *                 @OA\Items(type="string", example="https://example.com/photo1.jpg")
+     *                 @OA\Property(property="name", type="string", example="Buddy"),
+     *                 @OA\Property(property="type", type="string", example="Dog"),
+     *                 @OA\Property(property="gender", type="string", example="Male"),
+     *                 @OA\Property(property="size", type="string", example="Medium"),
+     *                 @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
+     *                 @OA\Property(property="breed", type="string", example="Golden Retriever"),
+     *                 @OA\Property(property="color", type="string", example="Golden"),
+     *                 @OA\Property(property="description", type="string", example="A friendly and playful dog."),
+     *                 @OA\Property(
+     *                     property="photos",
+     *                     type="array",
+     *                     description="Array of image files (1-5 images, max 5MB each)",
+     *
+     *                     @OA\Items(
+     *                         type="string",
+     *                         format="binary"
+     *                     )
+     *                 )
      *             )
-     *         ),
+     *         )
      *     ),
      *
      *     @OA\Response(
@@ -190,7 +198,6 @@ class PetController extends Controller
      *                 @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
      *                 @OA\Property(property="breed", type="string", example="Golden Retriever"),
      *                 @OA\Property(property="color", type="string", example="Golden"),
-     *                 @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
      *                 @OA\Property(property="description", type="string", example="A friendly and playful dog."),
      *                 @OA\Property(property="photos", type="array",
      *
@@ -219,11 +226,37 @@ class PetController extends Controller
     public function store(StorePetRequest $request)
     {
         $data = $request->validated();
+        $user = auth()->user();
+
+        // Processar upload das imagens
+        $photoPaths = [];
+
+        if ($request->hasFile('photos')) {
+            // Criar nome da pasta: {id}_{nome_do_usuario}
+            $folderName = $user->id . '_' . str_replace(' ', '_', $user->name);
+
+            foreach ($request->file('photos') as $index => $photo) {
+                // Gerar nome único para o arquivo
+                $filename = time() . '_' . $index . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+
+                // Salvar na storage/app/public/pets/{folderName}/
+                $path = $photo->storeAs("pets/{$folderName}", $filename, 'public');
+
+                // Adicionar URL completa ao array
+                $photoPaths[] = asset('storage/' . $path);
+            }
+        }
+
+        // Substituir o array de arquivos pelos paths salvos
+        $data['photos'] = $photoPaths;
+
+        // Garantir que user_id seja o usuário autenticado
+        $data['user_id'] = $user->id;
 
         $pet = Pet::create($data);
 
         return $this->success(
-            $pet,
+            $pet->load('user:id,name'),
             'Pet cadastrado com sucesso!',
             201
         );
@@ -264,7 +297,6 @@ class PetController extends Controller
      *                 @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
      *                 @OA\Property(property="breed", type="string", example="Golden Retriever"),
      *                 @OA\Property(property="color", type="string", example="Golden"),
-     *                 @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
      *                 @OA\Property(property="description", type="string", example="A friendly and playful dog."),
      *                 @OA\Property(property="photos", type="array",
      *
@@ -388,20 +420,28 @@ class PetController extends Controller
      */
     public function updatePhotos(Pet $pet, Request $request)
     {
-
         if (! $request->hasFile('photos')) {
             return $this->error('Nenhuma foto foi enviada!', 400);
         }
 
-        if ($request->hasFile('photos')) {
-            $photos = [];
-            foreach ($request->file('photos') as $photo) {
-                $path = $photo->store('pets', 'public');
-                //$photos[] = asset('storage/' . $path);
-                $photos[] = $path;
-            }
-            $pet->photos = $photos;
+        $user = auth()->user();
+        $photoPaths = [];
+
+        // Criar nome da pasta: {id}_{nome_do_usuario}
+        $folderName = $user->id . '_' . str_replace(' ', '_', $user->name);
+
+        foreach ($request->file('photos') as $index => $photo) {
+            // Gerar nome único para o arquivo
+            $filename = time() . '_' . $index . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
+
+            // Salvar na storage/app/public/pets/{folderName}/
+            $path = $photo->storeAs("pets/{$folderName}", $filename, 'public');
+
+            // Adicionar URL completa ao array
+            $photoPaths[] = asset('storage/' . $path);
         }
+
+        $pet->photos = $photoPaths;
         $pet->save();
 
         return $this->success($pet, 'Fotos atualizadas com sucesso!');
@@ -428,7 +468,7 @@ class PetController extends Controller
      *         required=true,
      *
      *         @OA\JsonContent(
-     *             required={"name", "type", "user_id", "gender", "size", "address", "description", "photos"},
+     *             required={"name", "type", "user_id", "gender", "size", "description", "photos"},
      *
      *             @OA\Property(property="name", type="string", example="Buddy"),
      *             @OA\Property(property="type", type="string", example="Dog"),
@@ -438,7 +478,6 @@ class PetController extends Controller
      *             @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
      *             @OA\Property(property="breed", type="string", example="Golden Retriever"),
      *             @OA\Property(property="color", type="string", example="Golden"),
-     *             @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
      *             @OA\Property(property="description", type="string", example="A friendly and playful dog."),
      *             @OA\Property(property="photos", type="array",
      *
@@ -465,7 +504,6 @@ class PetController extends Controller
      *                 @OA\Property(property="birth_date", type="string", format="date", example="2021-04-01"),
      *                 @OA\Property(property="breed", type="string", example="Golden Retriever"),
      *                 @OA\Property(property="color", type="string", example="Golden"),
-     *                 @OA\Property(property="address", type="string", example="1234 Dog Street, Dog City, DC"),
      *                 @OA\Property(property="description", type="string", example="A friendly and playful dog."),
      *                 @OA\Property(property="photos", type="array",
      *

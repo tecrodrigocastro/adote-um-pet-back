@@ -28,13 +28,11 @@ class StorePetRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'type' => ['required', Rule::in(PetType::values())],
-            'user_id' => ['required', 'integer', 'exists:users,id'],
             'gender' => ['required', Rule::in(PetGender::values())],
             'size' => ['required', Rule::in(PetSize::values())],
             'birth_date' => ['nullable', 'date', 'before:today'],
             'breed' => ['nullable', 'string', 'max:255'],
             'color' => ['nullable', 'string', 'max:255'],
-            'address' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'max:1000'],
             'photos' => ['required', 'array', 'min:1', 'max:5'],
             'photos.*' => [

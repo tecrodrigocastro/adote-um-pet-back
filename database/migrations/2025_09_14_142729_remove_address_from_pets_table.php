@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('messages', function (Blueprint $table) {
-            $table->timestamp('read_at')->nullable()->after('content');
-            $table->string('message_type')->default('text')->after('read_at');
+        Schema::table('pets', function (Blueprint $table) {
+            $table->dropColumn('address');
         });
     }
 
@@ -22,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('messages', function (Blueprint $table) {
-            $table->dropColumn(['read_at', 'message_type']);
+        Schema::table('pets', function (Blueprint $table) {
+            $table->string('address')->after('color');
         });
     }
 };

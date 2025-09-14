@@ -19,7 +19,6 @@ class Pet extends Model
         'birth_date',
         'breed',
         'color',
-        'address',
         'description',
         'photos',
         'status',
