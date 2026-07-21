@@ -2,8 +2,49 @@
 
 namespace App\Http\Requests;
 
+use App\Dtos\Auth\RegisterOrganizationDto;
 use Illuminate\Foundation\Http\FormRequest;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'RegisterOrganizationRequest',
+    required: ['email', 'password', 'organization_name', 'cnpj', 'responsible_name', 'phone', 'mission_statement', 'address'],
+    properties: [
+        new OA\Property(property: 'email', type: 'string', format: 'email', example: 'org@example.com'),
+        new OA\Property(property: 'password', type: 'string', format: 'password', example: 'password123'),
+        new OA\Property(property: 'organization_name', type: 'string', example: 'Abrigo Patinhas Felizes'),
+        new OA\Property(property: 'cnpj', type: 'string', example: '12345678000199'),
+        new OA\Property(property: 'responsible_name', type: 'string', example: 'Maria Souza'),
+        new OA\Property(property: 'phone', type: 'string', example: '1234567890'),
+        new OA\Property(property: 'mission_statement', type: 'string', example: 'Resgatar e encontrar lares para animais abandonados.'),
+        new OA\Property(property: 'website', type: 'string', example: 'https://patinhasfelizes.org', nullable: true),
+        new OA\Property(
+            property: 'social_media',
+            type: 'object',
+            nullable: true,
+            properties: [
+                new OA\Property(property: 'facebook', type: 'string', example: 'https://facebook.com/patinhasfelizes', nullable: true),
+                new OA\Property(property: 'instagram', type: 'string', example: 'https://instagram.com/patinhasfelizes', nullable: true),
+                new OA\Property(property: 'twitter', type: 'string', example: 'https://twitter.com/patinhasfelizes', nullable: true),
+                new OA\Property(property: 'linkedin', type: 'string', example: 'https://linkedin.com/company/patinhasfelizes', nullable: true),
+            ],
+        ),
+        new OA\Property(
+            property: 'address',
+            required: ['street', 'neighborhood', 'number_house', 'zip_code', 'city', 'state'],
+            properties: [
+                new OA\Property(property: 'street', type: 'string', example: 'Rua das Flores'),
+                new OA\Property(property: 'neighborhood', type: 'string', example: 'Centro'),
+                new OA\Property(property: 'number_house', type: 'integer', example: 123),
+                new OA\Property(property: 'complement', type: 'string', example: 'Sala 2', nullable: true),
+                new OA\Property(property: 'zip_code', type: 'string', example: '12345-678'),
+                new OA\Property(property: 'city', type: 'string', example: 'São Paulo'),
+                new OA\Property(property: 'state', type: 'string', example: 'SP'),
+            ],
+            type: 'object',
+        ),
+    ],
+)]
 class RegisterOrganizationRequest extends FormRequest
 {
     /**
@@ -82,5 +123,10 @@ class RegisterOrganizationRequest extends FormRequest
             'address.state.required' => 'O campo estado é obrigatório',
             'address.state.max' => 'O estado deve ter no máximo 2 caracteres',
         ];
+    }
+
+    public function toDto(): RegisterOrganizationDto
+    {
+        return RegisterOrganizationDto::fromArray($this->validated());
     }
 }

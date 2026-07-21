@@ -2,8 +2,18 @@
 
 namespace App\Http\Requests;
 
+use App\Dtos\Auth\LoginUserDto;
 use Illuminate\Foundation\Http\FormRequest;
+use OpenApi\Attributes as OA;
 
+#[OA\Schema(
+    schema: 'LoginRequest',
+    required: ['email', 'password'],
+    properties: [
+        new OA\Property(property: 'email', type: 'string', format: 'email', example: 'client@example.com'),
+        new OA\Property(property: 'password', type: 'string', format: 'password', example: 'password'),
+    ],
+)]
 class LoginRequest extends FormRequest
 {
     /**
@@ -39,5 +49,10 @@ class LoginRequest extends FormRequest
             'email.email' => 'O campo email deve ser um email válido',
             'password.required' => 'O campo senha é obrigatório',
         ];
+    }
+
+    public function toDto(): LoginUserDto
+    {
+        return LoginUserDto::fromArray($this->validated());
     }
 }
