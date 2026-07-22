@@ -9,6 +9,18 @@ use Stringable;
 
 final class Cnpj implements Stringable
 {
+    private const CNPJ_LENGTH = 14;
+    private const INITIAL_MULTIPLIER_FIRST = 5;
+    private const INITIAL_MULTIPLIER_SECOND = 6;
+    private const FIRST_CHECK_DIGIT_LOOP_LIMIT = 12;
+    private const SECOND_CHECK_DIGIT_LOOP_LIMIT = 13;
+    private const CHECK_DIGIT_INDEX_FIRST = 12;
+    private const CHECK_DIGIT_INDEX_SECOND = 13;
+    private const MULTIPLIER_MIN_VALUE = 1;
+    private const MULTIPLIER_RESET_VALUE = 9;
+    private const CHECKSUM_MODULO = 11;
+    private const INVALID_CHECKSUM_OFFSET = 10;
+
     private readonly string $value;
 
     public function __construct(string $cnpj)
@@ -38,7 +50,7 @@ final class Cnpj implements Stringable
 
     private function isValidFormat(string $cnpj): bool
     {
-        if (strlen($cnpj) !== 14) {
+        if (strlen($cnpj) !== self::CNPJ_LENGTH) {
             return false;
         }
 
@@ -55,38 +67,41 @@ final class Cnpj implements Stringable
         $cnpjArray = str_split($cnpj);
 
         // Validate first check digit
-        $sum = 0;
-        $multiplier = 5;
-        for ($i = 0; $i < 12; $i++) {
-            $sum += (int) $cnpjArray[$i] * $multiplier;
-            $multiplier--;
-            if ($multiplier === 1) {
-                $multiplier = 9;
-            }
-        }
+        $firstDigit = $this->calculateCheckDigit(
+            $cnpjArray,
+            self::INITIAL_MULTIPLIER_FIRST,
+            self::FIRST_CHECK_DIGIT_LOOP_LIMIT
+        );
 
-        $firstDigit = 11 - ($sum % 11);
-        $firstDigit = $firstDigit >= 10 ? 0 : $firstDigit;
-
-        if ((int) $cnpjArray[12] !== $firstDigit) {
+        if ((int) $cnpjArray[self::CHECK_DIGIT_INDEX_FIRST] !== $firstDigit) {
             return false;
         }
 
         // Validate second check digit
+        $secondDigit = $this->calculateCheckDigit(
+            $cnpjArray,
+            self::INITIAL_MULTIPLIER_SECOND,
+            self::SECOND_CHECK_DIGIT_LOOP_LIMIT
+        );
+
+        return (int) $cnpjArray[self::CHECK_DIGIT_INDEX_SECOND] === $secondDigit;
+    }
+
+    private function calculateCheckDigit(array $cnpjArray, int $startMultiplier, int $loopLimit): int
+    {
         $sum = 0;
-        $multiplier = 6;
-        for ($i = 0; $i < 13; $i++) {
+        $multiplier = $startMultiplier;
+
+        for ($i = 0; $i < $loopLimit; $i++) {
             $sum += (int) $cnpjArray[$i] * $multiplier;
             $multiplier--;
-            if ($multiplier === 1) {
-                $multiplier = 9;
+            if ($multiplier === self::MULTIPLIER_MIN_VALUE) {
+                $multiplier = self::MULTIPLIER_RESET_VALUE;
             }
         }
 
-        $secondDigit = 11 - ($sum % 11);
-        $secondDigit = $secondDigit >= 10 ? 0 : $secondDigit;
-
-        return (int) $cnpjArray[13] === $secondDigit;
+        $checkDigit = self::CHECKSUM_MODULO - ($sum % self::CHECKSUM_MODULO);
+        return $checkDigit >= self::INVALID_CHECKSUM_OFFSET ? 0 : $checkDigit;
     }
 
     public function value(): string
