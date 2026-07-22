@@ -22,65 +22,14 @@
                     "Auth"
                 ],
                 "summary": "Register a new client",
-                "description": "Registers a new client and returns the client data with an access token",
+                "description": "Registers a new client and returns the created user",
                 "operationId": "da8643013c2941f5ed7f8a9c9b4a7f7a",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "name",
-                                    "email",
-                                    "password",
-                                    "phone",
-                                    "address",
-                                    "zip_code",
-                                    "number_house",
-                                    "complement",
-                                    "photo_url"
-                                ],
-                                "properties": {
-                                    "name": {
-                                        "type": "string",
-                                        "example": "John Doe"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "client@example.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "password123"
-                                    },
-                                    "phone": {
-                                        "type": "string",
-                                        "example": "1234567890"
-                                    },
-                                    "address": {
-                                        "type": "string",
-                                        "example": "123 Main St"
-                                    },
-                                    "zip_code": {
-                                        "type": "string",
-                                        "example": "12345-678"
-                                    },
-                                    "number_house": {
-                                        "type": "integer",
-                                        "example": 123
-                                    },
-                                    "complement": {
-                                        "type": "string",
-                                        "example": "Apt 4B"
-                                    },
-                                    "photo_url": {
-                                        "type": "string",
-                                        "example": "https://example.com/photo.jpg"
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/RegisterUserRequest"
                             }
                         }
                     }
@@ -92,65 +41,16 @@
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "John Doe"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "format": "email",
-                                                    "example": "client@example.com"
-                                                },
-                                                "phone": {
-                                                    "type": "string",
-                                                    "example": "1234567890"
-                                                },
-                                                "address": {
-                                                    "type": "string",
-                                                    "example": "123 Main St"
-                                                },
-                                                "zip_code": {
-                                                    "type": "string",
-                                                    "example": "12345-678"
-                                                },
-                                                "number_house": {
-                                                    "type": "integer",
-                                                    "example": 123
-                                                },
-                                                "complement": {
-                                                    "type": "string",
-                                                    "example": "Apt 4B"
-                                                },
-                                                "photo_url": {
-                                                    "type": "string",
-                                                    "example": "https://example.com/photo.jpg"
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2023-07-13T10:12:34.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2023-07-13T10:12:34.000000Z"
-                                                }
-                                            },
-                                            "type": "object"
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "User registered successfully"
+                                            "example": "Usuário cadastrado com sucesso!"
                                         },
-                                        "status_code": {
-                                            "type": "integer",
-                                            "example": 201
+                                        "data": {
+                                            "$ref": "#/components/schemas/UserResource"
                                         }
                                     },
                                     "type": "object"
@@ -158,8 +58,8 @@
                             }
                         }
                     },
-                    "400": {
-                        "description": "Validation Error",
+                    "422": {
+                        "description": "Validation error",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -181,6 +81,16 @@
                                 }
                             }
                         }
+                    },
+                    "409": {
+                        "description": "Email already registered (concurrent registration)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -198,23 +108,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "email",
-                                    "password"
-                                ],
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "client@example.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "password"
-                                    }
-                                },
-                                "type": "object"
+                                "$ref": "#/components/schemas/LoginRequest"
                             }
                         }
                     }
@@ -232,13 +126,16 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Login successful"
+                                            "example": "Login realizado com sucesso!"
                                         },
                                         "data": {
                                             "properties": {
+                                                "user": {
+                                                    "$ref": "#/components/schemas/UserResource"
+                                                },
                                                 "access_token": {
                                                     "type": "string",
-                                                    "example": "your-access-token"
+                                                    "example": "1|abcdef123456"
                                                 }
                                             },
                                             "type": "object"
@@ -250,24 +147,11 @@
                         }
                     },
                     "401": {
-                        "description": "Unauthorized",
+                        "description": "Invalid credentials",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        },
-                                        "data": {
-                                            "type": "null"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
                                 }
                             }
                         }
@@ -281,7 +165,7 @@
                     "Auth"
                 ],
                 "summary": "Logout client",
-                "description": "Logout a client by invalidating the token",
+                "description": "Logout a client by invalidating the current access token",
                 "operationId": "46f8a14c8083abb69eed72768aa08629",
                 "responses": {
                     "200": {
@@ -296,10 +180,12 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Logout successful"
+                                            "example": "Logout realizado com sucesso!"
                                         },
                                         "data": {
-                                            "type": "null"
+                                            "type": "array",
+                                            "items": {},
+                                            "example": []
                                         }
                                     },
                                     "type": "object"
@@ -312,20 +198,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        },
-                                        "data": {
-                                            "type": "null"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
                                 }
                             }
                         }
@@ -344,7 +217,7 @@
                     "Auth"
                 ],
                 "summary": "Refresh client access token",
-                "description": "Refreshes the client's access token",
+                "description": "Revokes the client's current access token and issues a new one",
                 "operationId": "f3538b6e9c46bcf601a9d194288b03d4",
                 "responses": {
                     "200": {
@@ -359,13 +232,17 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "Token refreshed successfully"
+                                            "example": "Token atualizado com sucesso!"
                                         },
                                         "data": {
                                             "properties": {
                                                 "access_token": {
                                                     "type": "string",
-                                                    "example": "your-new-access-token"
+                                                    "example": "1|abcdef123456"
+                                                },
+                                                "token_type": {
+                                                    "type": "string",
+                                                    "example": "Bearer"
                                                 }
                                             },
                                             "type": "object"
@@ -381,20 +258,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthorized"
-                                        },
-                                        "data": {
-                                            "type": "null"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
                                 }
                             }
                         }
@@ -428,59 +292,10 @@
                                         },
                                         "message": {
                                             "type": "string",
-                                            "example": "User data fetched successfully"
+                                            "example": "Usuário autenticado"
                                         },
                                         "data": {
-                                            "properties": {
-                                                "id": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "name": {
-                                                    "type": "string",
-                                                    "example": "John Doe"
-                                                },
-                                                "email": {
-                                                    "type": "string",
-                                                    "format": "email",
-                                                    "example": "client@example.com"
-                                                },
-                                                "phone": {
-                                                    "type": "string",
-                                                    "example": "1234567890"
-                                                },
-                                                "address": {
-                                                    "type": "string",
-                                                    "example": "123 Main St"
-                                                },
-                                                "zip_code": {
-                                                    "type": "string",
-                                                    "example": "12345-678"
-                                                },
-                                                "number_house": {
-                                                    "type": "integer",
-                                                    "example": 123
-                                                },
-                                                "complement": {
-                                                    "type": "string",
-                                                    "example": "Apt 4B"
-                                                },
-                                                "photo_url": {
-                                                    "type": "string",
-                                                    "example": "https://example.com/photo.jpg"
-                                                },
-                                                "created_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2023-07-13T10:12:34.000000Z"
-                                                },
-                                                "updated_at": {
-                                                    "type": "string",
-                                                    "format": "date-time",
-                                                    "example": "2023-07-13T10:12:34.000000Z"
-                                                }
-                                            },
-                                            "type": "object"
+                                            "$ref": "#/components/schemas/UserResource"
                                         }
                                     },
                                     "type": "object"
@@ -493,20 +308,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated."
-                                        },
-                                        "data": {
-                                            "type": "null"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
                                 }
                             }
                         }
@@ -519,43 +321,93 @@
                 ]
             }
         },
+        "/api/auth/register/organization": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Register a new organization",
+                "description": "Registers a new organization account, pending verification",
+                "operationId": "e0deb876c642fda4525725c6743a248c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterOrganizationRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Organization registered, pending verification",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Organização cadastrada com sucesso! Aguardando verificação."
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/OrganizationResource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "cnpj": [
+                                                    "CNPJ já cadastrado"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Email or CNPJ already registered (concurrent registration)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiErrorResponse"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/chats": {
             "get": {
                 "tags": [
                     "Chats"
                 ],
                 "summary": "Get chat list",
-                "description": "Retrieve a list of chats between adopters and pet owners based on the provided adopter, owner, and pet IDs. Returns chat details, including pet, adopter, and owner information, as well as messages.",
+                "description": "Retrieve a list of chats for the authenticated user. Returns chat details, including pet, adopter, and owner information, as well as the latest message.",
                 "operationId": "807aea6ca8a518618b51a32794dfe918",
-                "parameters": [
-                    {
-                        "name": "adopter_id",
-                        "in": "query",
-                        "description": "ID of the adopter",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "owner_id",
-                        "in": "query",
-                        "description": "ID of the pet owner",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "pet_id",
-                        "in": "query",
-                        "description": "ID of the pet",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "Chat details retrieved successfully",
@@ -796,17 +648,12 @@
                             "schema": {
                                 "required": [
                                     "chat_id",
-                                    "sender_id",
                                     "content"
                                 ],
                                 "properties": {
                                     "chat_id": {
                                         "type": "integer",
                                         "example": 1
-                                    },
-                                    "sender_id": {
-                                        "type": "integer",
-                                        "example": 5
                                     },
                                     "content": {
                                         "type": "string",
@@ -834,10 +681,6 @@
                                                 "chat_id": {
                                                     "type": "integer",
                                                     "example": 1
-                                                },
-                                                "sender_id": {
-                                                    "type": "integer",
-                                                    "example": 5
                                                 },
                                                 "content": {
                                                     "type": "string",
@@ -981,10 +824,6 @@
                                                         "type": "string",
                                                         "example": "Golden"
                                                     },
-                                                    "address": {
-                                                        "type": "string",
-                                                        "example": "1234 Dog Street, Dog City, DC"
-                                                    },
                                                     "description": {
                                                         "type": "string",
                                                         "example": "A friendly and playful dog."
@@ -1051,20 +890,19 @@
                     "Pets"
                 ],
                 "summary": "Create a new pet",
-                "description": "Create a new pet and store it in the database",
+                "description": "Create a new pet and store it in the database with image file uploads",
                 "operationId": "9523721805529edb47b46332d56f2826",
                 "requestBody": {
+                    "description": "Pet registration data with image files",
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "name",
                                     "type",
-                                    "user_id",
                                     "gender",
                                     "size",
-                                    "address",
                                     "description",
                                     "photos"
                                 ],
@@ -1076,10 +914,6 @@
                                     "type": {
                                         "type": "string",
                                         "example": "Dog"
-                                    },
-                                    "user_id": {
-                                        "type": "integer",
-                                        "example": 1
                                     },
                                     "gender": {
                                         "type": "string",
@@ -1102,19 +936,16 @@
                                         "type": "string",
                                         "example": "Golden"
                                     },
-                                    "address": {
-                                        "type": "string",
-                                        "example": "1234 Dog Street, Dog City, DC"
-                                    },
                                     "description": {
                                         "type": "string",
                                         "example": "A friendly and playful dog."
                                     },
                                     "photos": {
+                                        "description": "Array of image files (1-5 images, max 5MB each)",
                                         "type": "array",
                                         "items": {
                                             "type": "string",
-                                            "example": "https://example.com/photo1.jpg"
+                                            "format": "binary"
                                         }
                                     }
                                 },
@@ -1176,10 +1007,6 @@
                                                 "color": {
                                                     "type": "string",
                                                     "example": "Golden"
-                                                },
-                                                "address": {
-                                                    "type": "string",
-                                                    "example": "1234 Dog Street, Dog City, DC"
                                                 },
                                                 "description": {
                                                     "type": "string",
@@ -1316,10 +1143,6 @@
                                                     "type": "string",
                                                     "example": "Golden"
                                                 },
-                                                "address": {
-                                                    "type": "string",
-                                                    "example": "1234 Dog Street, Dog City, DC"
-                                                },
                                                 "description": {
                                                     "type": "string",
                                                     "example": "A friendly and playful dog."
@@ -1410,7 +1233,6 @@
                                     "user_id",
                                     "gender",
                                     "size",
-                                    "address",
                                     "description",
                                     "photos"
                                 ],
@@ -1447,10 +1269,6 @@
                                     "color": {
                                         "type": "string",
                                         "example": "Golden"
-                                    },
-                                    "address": {
-                                        "type": "string",
-                                        "example": "1234 Dog Street, Dog City, DC"
                                     },
                                     "description": {
                                         "type": "string",
@@ -1522,10 +1340,6 @@
                                                 "color": {
                                                     "type": "string",
                                                     "example": "Golden"
-                                                },
-                                                "address": {
-                                                    "type": "string",
-                                                    "example": "1234 Dog Street, Dog City, DC"
                                                 },
                                                 "description": {
                                                     "type": "string",
@@ -2141,6 +1955,380 @@
         }
     },
     "components": {
+        "schemas": {
+            "ApiErrorResponse": {
+                "properties": {
+                    "success": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Unauthorized"
+                    },
+                    "data": {
+                        "type": "object",
+                        "example": null,
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "LoginRequest": {
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "client@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "password"
+                    }
+                },
+                "type": "object"
+            },
+            "RegisterOrganizationRequest": {
+                "required": [
+                    "email",
+                    "password",
+                    "organization_name",
+                    "cnpj",
+                    "responsible_name",
+                    "phone",
+                    "mission_statement",
+                    "address"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "org@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "password123"
+                    },
+                    "organization_name": {
+                        "type": "string",
+                        "example": "Abrigo Patinhas Felizes"
+                    },
+                    "cnpj": {
+                        "type": "string",
+                        "example": "12345678000199"
+                    },
+                    "responsible_name": {
+                        "type": "string",
+                        "example": "Maria Souza"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "mission_statement": {
+                        "type": "string",
+                        "example": "Resgatar e encontrar lares para animais abandonados."
+                    },
+                    "website": {
+                        "type": "string",
+                        "example": "https://patinhasfelizes.org",
+                        "nullable": true
+                    },
+                    "social_media": {
+                        "properties": {
+                            "facebook": {
+                                "type": "string",
+                                "example": "https://facebook.com/patinhasfelizes",
+                                "nullable": true
+                            },
+                            "instagram": {
+                                "type": "string",
+                                "example": "https://instagram.com/patinhasfelizes",
+                                "nullable": true
+                            },
+                            "twitter": {
+                                "type": "string",
+                                "example": "https://twitter.com/patinhasfelizes",
+                                "nullable": true
+                            },
+                            "linkedin": {
+                                "type": "string",
+                                "example": "https://linkedin.com/company/patinhasfelizes",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "address": {
+                        "required": [
+                            "street",
+                            "neighborhood",
+                            "number_house",
+                            "zip_code",
+                            "city",
+                            "state"
+                        ],
+                        "properties": {
+                            "street": {
+                                "type": "string",
+                                "example": "Rua das Flores"
+                            },
+                            "neighborhood": {
+                                "type": "string",
+                                "example": "Centro"
+                            },
+                            "number_house": {
+                                "type": "integer",
+                                "example": 123
+                            },
+                            "complement": {
+                                "type": "string",
+                                "example": "Sala 2",
+                                "nullable": true
+                            },
+                            "zip_code": {
+                                "type": "string",
+                                "example": "12345-678"
+                            },
+                            "city": {
+                                "type": "string",
+                                "example": "São Paulo"
+                            },
+                            "state": {
+                                "type": "string",
+                                "example": "SP"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "RegisterUserRequest": {
+                "required": [
+                    "name",
+                    "email",
+                    "password",
+                    "phone",
+                    "address"
+                ],
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "client@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "password123"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "photo_url": {
+                        "type": "string",
+                        "example": "https://example.com/photo.jpg",
+                        "nullable": true
+                    },
+                    "address": {
+                        "required": [
+                            "street",
+                            "neighborhood",
+                            "number_house",
+                            "zip_code",
+                            "city",
+                            "state"
+                        ],
+                        "properties": {
+                            "street": {
+                                "type": "string",
+                                "example": "Rua das Flores"
+                            },
+                            "neighborhood": {
+                                "type": "string",
+                                "example": "Centro"
+                            },
+                            "number_house": {
+                                "type": "integer",
+                                "example": 123
+                            },
+                            "complement": {
+                                "type": "string",
+                                "example": "Apto 4B",
+                                "nullable": true
+                            },
+                            "zip_code": {
+                                "type": "string",
+                                "example": "12345-678"
+                            },
+                            "city": {
+                                "type": "string",
+                                "example": "São Paulo"
+                            },
+                            "state": {
+                                "type": "string",
+                                "example": "SP"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "AddressResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "street": {
+                        "type": "string",
+                        "example": "Rua das Flores"
+                    },
+                    "neighborhood": {
+                        "type": "string",
+                        "example": "Centro"
+                    },
+                    "number_house": {
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "complement": {
+                        "type": "string",
+                        "example": "Apto 4B",
+                        "nullable": true
+                    },
+                    "zip_code": {
+                        "type": "string",
+                        "example": "12345-678"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "São Paulo"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "SP"
+                    }
+                },
+                "type": "object"
+            },
+            "OrganizationResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "org@example.com"
+                    },
+                    "organization_name": {
+                        "type": "string",
+                        "example": "Abrigo Patinhas Felizes"
+                    },
+                    "cnpj": {
+                        "type": "string",
+                        "example": "12345678000199"
+                    },
+                    "responsible_name": {
+                        "type": "string",
+                        "example": "Maria Souza"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "mission_statement": {
+                        "type": "string",
+                        "example": "Resgatar e encontrar lares para animais abandonados."
+                    },
+                    "website": {
+                        "type": "string",
+                        "example": "https://patinhasfelizes.org",
+                        "nullable": true
+                    },
+                    "verified": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "addresses": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AddressResource"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-07-13T10:12:34.000000Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-07-13T10:12:34.000000Z"
+                    }
+                },
+                "type": "object"
+            },
+            "UserResource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "client@example.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                    },
+                    "photo_url": {
+                        "type": "string",
+                        "example": "https://example.com/photo.jpg",
+                        "nullable": true
+                    },
+                    "addresses": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AddressResource"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-07-13T10:12:34.000000Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2023-07-13T10:12:34.000000Z"
+                    }
+                },
+                "type": "object"
+            }
+        },
         "securitySchemes": {
             "sanctum": {
                 "type": "apiKey",

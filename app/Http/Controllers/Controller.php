@@ -2,6 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use OpenApi\Attributes as OA;
+
+#[OA\Schema(
+    schema: 'ApiErrorResponse',
+    properties: [
+        new OA\Property(property: 'success', type: 'boolean', example: false),
+        new OA\Property(property: 'message', type: 'string', example: 'Unauthorized'),
+        new OA\Property(property: 'data', type: 'object', example: null, nullable: true),
+    ],
+)]
 abstract class Controller
 {
     public function success(mixed $data, string $message = 'okay', int $statusCode = 200)

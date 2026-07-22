@@ -54,6 +54,9 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'email' => \App\Modules\Auth\Infrastructure\Casts\EmailCast::class,
+            'cnpj' => \App\Modules\Auth\Infrastructure\Casts\CnpjCast::class,
+            'phone' => \App\Modules\Auth\Infrastructure\Casts\PhoneCast::class,
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'user_type' => UserType::class,

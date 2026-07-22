@@ -1,0 +1,37 @@
+<?php
+
+use App\Modules\Auth\Application\DTOs\SocialMediaDto;
+
+it('builds itself from an array', function () {
+    $dto = SocialMediaDto::from([
+        'facebook' => 'https://facebook.com/patinhasfelizes',
+        'instagram' => 'https://instagram.com/patinhasfelizes',
+        'twitter' => null,
+        'linkedin' => null,
+    ]);
+
+    expect($dto->facebook)->toBe('https://facebook.com/patinhasfelizes')
+        ->and($dto->instagram)->toBe('https://instagram.com/patinhasfelizes')
+        ->and($dto->twitter)->toBeNull()
+        ->and($dto->linkedin)->toBeNull();
+});
+
+it('defaults missing keys to null', function () {
+    $dto = SocialMediaDto::from(['facebook' => 'https://facebook.com/patinhasfelizes']);
+
+    expect($dto->facebook)->toBe('https://facebook.com/patinhasfelizes')
+        ->and($dto->instagram)->toBeNull()
+        ->and($dto->twitter)->toBeNull()
+        ->and($dto->linkedin)->toBeNull();
+});
+
+it('converts back to an array', function () {
+    $data = [
+        'facebook' => 'https://facebook.com/patinhasfelizes',
+        'instagram' => null,
+        'twitter' => null,
+        'linkedin' => null,
+    ];
+
+    expect(SocialMediaDto::from($data)->toArray())->toBe($data);
+});
