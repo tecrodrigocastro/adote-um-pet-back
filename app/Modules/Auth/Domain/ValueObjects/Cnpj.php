@@ -7,7 +7,7 @@ namespace App\Modules\Auth\Domain\ValueObjects;
 use InvalidArgumentException;
 use Stringable;
 
-final class Cnpj implements Stringable
+final class Cnpj implements ValueObject
 {
     private const CNPJ_LENGTH = 14;
     private const INITIAL_MULTIPLIER_FIRST = 5;
@@ -118,9 +118,9 @@ final class Cnpj implements Stringable
         ) ?? $this->value;
     }
 
-    public function equals(self $other): bool
+    public function equals(ValueObject $other): bool
     {
-        return $this->value === $other->value;
+        return $other instanceof self && $this->value === $other->value;
     }
 
     public function __toString(): string

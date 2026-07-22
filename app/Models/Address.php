@@ -20,4 +20,11 @@ class Address extends Model
         'city',
         'state',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'zip_code' => \App\Modules\Auth\Infrastructure\Casts\ZipCodeCast::class,
+        ];
+    }
 }

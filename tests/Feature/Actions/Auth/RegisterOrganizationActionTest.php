@@ -16,7 +16,7 @@ function registerOrganizationDto(): RegisterOrganizationDto
         email: 'org@example.com',
         password: 'secret123',
         organizationName: 'Abrigo Patinhas Felizes',
-        cnpj: '12345678000199',
+        cnpj: '00000000000191',
         responsibleName: 'Maria Souza',
         phone: '1234567890',
         missionStatement: 'Resgatar e encontrar lares para animais abandonados.',
@@ -45,9 +45,9 @@ it('creates the organization and its address inside a single call', function () 
     expect($organization)->toBeInstanceOf(User::class)
         ->and($organization->exists)->toBeTrue()
         ->and($organization->user_type)->toBe(UserType::ORGANIZATION)
-        ->and($organization->email)->toBe('org@example.com')
+        ->and($organization->email->value())->toBe('org@example.com')
         ->and($organization->organization_name)->toBe('Abrigo Patinhas Felizes')
-        ->and($organization->cnpj)->toBe('12345678000199')
+        ->and($organization->cnpj->value())->toBe('00000000000191')
         ->and($organization->verified)->toBeFalse()
         ->and($organization->social_media)->toBe([
             'facebook' => 'https://facebook.com/patinhasfelizes',
@@ -59,7 +59,7 @@ it('creates the organization and its address inside a single call', function () 
         ->and($organization->addresses)->toHaveCount(1)
         ->and($organization->addresses->first()->city)->toBe('São Paulo');
 
-    $this->assertDatabaseHas('users', ['email' => 'org@example.com', 'cnpj' => '12345678000199']);
+    $this->assertDatabaseHas('users', ['email' => 'org@example.com', 'cnpj' => '00000000000191']);
     $this->assertDatabaseHas('addresses', ['user_id' => $organization->id, 'city' => 'São Paulo']);
 });
 
@@ -86,10 +86,10 @@ it('throws a domain exception when the email is already taken', function () {
 });
 
 it('throws a domain exception when the cnpj is already taken', function () {
-    User::factory()->create(['email' => 'someone-else@example.com', 'cnpj' => '12345678000199']);
+    User::factory()->create(['email' => 'someone-else@example.com', 'cnpj' => '00000000000191']);
 
     expect(fn () => app(RegisterOrganizationAction::class)->handle(registerOrganizationDto()))
-        ->toThrow(CnpjAlreadyRegisteredException::class, 'O CNPJ 12345678000199 já está em uso.');
+        ->toThrow(CnpjAlreadyRegisteredException::class, 'O CNPJ 00000000000191 já está em uso.');
 
     $this->assertDatabaseCount('users', 1);
     $this->assertDatabaseCount('addresses', 0);

@@ -15,7 +15,7 @@ it('creates a new organization with address', function () {
         'email' => 'org@example.com',
         'password' => 'secret123',
         'organization_name' => 'Help Animals Foundation',
-        'cnpj' => '12.345.678/0001-90',
+        'cnpj' => '00.000.000/0001-91',
         'responsible_name' => 'John Doe',
         'phone' => '11999999999',
         'mission_statement' => 'We help animals in need',
@@ -36,13 +36,13 @@ it('creates a new organization with address', function () {
     $organization = $action->handle($dto);
 
     expect($organization)->toBeInstanceOf(User::class)
-        ->and($organization->email)->toBe('org@example.com')
+        ->and($organization->email->value())->toBe('org@example.com')
         ->and($organization->user_type)->toBe(UserType::ORGANIZATION)
         ->and($organization->organization_name)->toBe('Help Animals Foundation')
         ->and($organization->name)->toBe('Help Animals Foundation')
-        ->and($organization->cnpj)->toBe('12.345.678/0001-90')
+        ->and($organization->cnpj->value())->toBe('00000000000191')
         ->and($organization->responsible_name)->toBe('John Doe')
-        ->and($organization->phone)->toBe('11999999999')
+        ->and($organization->phone->value())->toBe('11999999999')
         ->and($organization->mission_statement)->toBe('We help animals in need')
         ->and($organization->website)->toBe('https://helpanimals.org')
         ->and($organization->verified)->toBeFalse()
@@ -57,7 +57,7 @@ it('creates organization with social media', function () {
         'email' => 'org@example.com',
         'password' => 'secret123',
         'organization_name' => 'Help Animals Foundation',
-        'cnpj' => '12.345.678/0001-90',
+        'cnpj' => '00.000.000/0001-91',
         'responsible_name' => 'John Doe',
         'phone' => '11999999999',
         'mission_statement' => 'We help animals in need',
@@ -90,7 +90,7 @@ it('handles optional social media as null', function () {
         'email' => 'org@example.com',
         'password' => 'secret123',
         'organization_name' => 'Help Animals Foundation',
-        'cnpj' => '12.345.678/0001-90',
+        'cnpj' => '00.000.000/0001-91',
         'responsible_name' => 'John Doe',
         'phone' => '11999999999',
         'mission_statement' => 'We help animals in need',
@@ -117,7 +117,7 @@ it('handles optional website as null', function () {
         'email' => 'org@example.com',
         'password' => 'secret123',
         'organization_name' => 'Help Animals Foundation',
-        'cnpj' => '12.345.678/0001-90',
+        'cnpj' => '00.000.000/0001-91',
         'responsible_name' => 'John Doe',
         'phone' => '11999999999',
         'mission_statement' => 'We help animals in need',
@@ -144,7 +144,7 @@ it('hashes the organization password', function () {
         'email' => 'org@example.com',
         'password' => 'secret123',
         'organization_name' => 'Help Animals Foundation',
-        'cnpj' => '12.345.678/0001-90',
+        'cnpj' => '00.000.000/0001-91',
         'responsible_name' => 'John Doe',
         'phone' => '11999999999',
         'mission_statement' => 'We help animals in need',
@@ -176,7 +176,7 @@ it('throws EmailAlreadyRegisteredException when email is already in use', functi
         'email' => 'org@example.com',
         'password' => 'secret123',
         'organization_name' => 'Help Animals Foundation',
-        'cnpj' => '12.345.678/0001-90',
+        'cnpj' => '00.000.000/0001-91',
         'responsible_name' => 'John Doe',
         'phone' => '11999999999',
         'mission_statement' => 'We help animals in need',
@@ -201,7 +201,7 @@ it('throws EmailAlreadyRegisteredException when email is already in use', functi
 it('throws CnpjAlreadyRegisteredException when cnpj is already in use', function () {
     User::factory()->create([
         'email' => 'existing@example.com',
-        'cnpj' => '12.345.678/0001-90',
+        'cnpj' => '00.000.000/0001-91',
         'user_type' => UserType::ORGANIZATION,
     ]);
 
@@ -209,7 +209,7 @@ it('throws CnpjAlreadyRegisteredException when cnpj is already in use', function
         'email' => 'new@example.com',
         'password' => 'secret123',
         'organization_name' => 'Help Animals Foundation',
-        'cnpj' => '12.345.678/0001-90',
+        'cnpj' => '00.000.000/0001-91',
         'responsible_name' => 'John Doe',
         'phone' => '11999999999',
         'mission_statement' => 'We help animals in need',
@@ -236,7 +236,7 @@ it('handles optional address complement field', function () {
         'email' => 'org@example.com',
         'password' => 'secret123',
         'organization_name' => 'Help Animals Foundation',
-        'cnpj' => '12.345.678/0001-90',
+        'cnpj' => '00.000.000/0001-91',
         'responsible_name' => 'John Doe',
         'phone' => '11999999999',
         'mission_statement' => 'We help animals in need',
@@ -266,7 +266,7 @@ it('rolls back organization creation if address creation fails', function () {
         'email' => 'org@example.com',
         'password' => 'secret123',
         'organization_name' => 'Help Animals Foundation',
-        'cnpj' => '12.345.678/0001-90',
+        'cnpj' => '00.000.000/0001-91',
         'responsible_name' => 'John Doe',
         'phone' => '11999999999',
         'mission_statement' => 'We help animals in need',

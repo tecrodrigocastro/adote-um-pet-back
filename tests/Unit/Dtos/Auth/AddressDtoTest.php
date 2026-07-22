@@ -49,15 +49,23 @@ it('defaults complement to null when missing', function () {
 });
 
 it('converts back to an array using snake_case keys', function () {
-    $data = [
+    $dto = AddressDto::fromArray([
         'street' => 'Rua das Flores',
         'neighborhood' => 'Centro',
         'number_house' => 123,
-        'complement' => null,
+        'complement' => 'Apto 4B',
         'zip_code' => '12345-678',
         'city' => 'São Paulo',
         'state' => 'SP',
-    ];
+    ]);
 
-    expect(AddressDto::fromArray($data)->toArray())->toBe($data);
+    expect($dto->toArray())->toBe([
+        'street' => 'Rua das Flores',
+        'neighborhood' => 'Centro',
+        'number_house' => 123,
+        'complement' => 'Apto 4B',
+        'zip_code' => '12345-678',
+        'city' => 'São Paulo',
+        'state' => 'SP',
+    ]);
 });

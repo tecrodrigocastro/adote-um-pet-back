@@ -34,7 +34,7 @@ it('creates the user and its address inside a single call', function () {
     expect($user)->toBeInstanceOf(User::class)
         ->and($user->exists)->toBeTrue()
         ->and($user->name)->toBe('John Doe')
-        ->and($user->email)->toBe('john@example.com')
+        ->and($user->email->value())->toBe('john@example.com')
         ->and(Hash::check('secret123', $user->password))->toBeTrue()
         ->and($user->relationLoaded('addresses'))->toBeTrue()
         ->and($user->addresses)->toHaveCount(1)

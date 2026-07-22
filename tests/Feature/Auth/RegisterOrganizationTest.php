@@ -8,7 +8,7 @@ function validRegisterOrganizationPayload(array $overrides = []): array
         'email' => 'org@example.com',
         'password' => 'secret123',
         'organization_name' => 'Abrigo Patinhas Felizes',
-        'cnpj' => '12345678000199',
+        'cnpj' => '00000000000191',
         'responsible_name' => 'Maria Souza',
         'phone' => '1234567890',
         'mission_statement' => 'Resgatar e encontrar lares para animais abandonados.',
@@ -50,7 +50,7 @@ it('registers a new organization and returns it through the organization resourc
 
     expect($response->json('data'))->not->toHaveKey('password');
 
-    $this->assertDatabaseHas('users', ['email' => 'org@example.com', 'cnpj' => '12345678000199']);
+    $this->assertDatabaseHas('users', ['email' => 'org@example.com', 'cnpj' => '00000000000191']);
     $this->assertDatabaseHas('addresses', ['city' => 'São Paulo']);
 });
 
@@ -75,7 +75,7 @@ it('fails validation when the email is already registered', function () {
 });
 
 it('fails validation when the cnpj is already registered', function () {
-    User::factory()->create(['email' => 'someone-else@example.com', 'cnpj' => '12345678000199']);
+    User::factory()->create(['email' => 'someone-else@example.com', 'cnpj' => '00000000000191']);
 
     $response = $this->postJson('/api/auth/register/organization', validRegisterOrganizationPayload());
 

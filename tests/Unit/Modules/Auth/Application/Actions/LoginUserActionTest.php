@@ -27,7 +27,7 @@ it('authenticates user with valid credentials', function () {
 
     expect($result)->toBeInstanceOf(LoginUserResult::class)
         ->and($result->user->id)->toBe($user->id)
-        ->and($result->user->email)->toBe('john@example.com')
+        ->and($result->user->email->value())->toBe('john@example.com')
         ->and($result->token)->toBeString()
         ->and(Auth::check())->toBeTrue();
 });

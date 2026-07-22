@@ -10,7 +10,8 @@ use App\Modules\Auth\Application\DTOs\AddressDto;
 use App\Modules\Auth\Application\DTOs\RegisterOrganizationDto;
 use App\Modules\Auth\Domain\Exceptions\CnpjAlreadyRegisteredException;
 use App\Modules\Auth\Domain\Exceptions\EmailAlreadyRegisteredException;
-use Illuminate\Database\QueryException;
+use App\Modules\Auth\Domain\ValueObjects\Cnpj;
+use App\Modules\Auth\Domain\ValueObjects\Email;
 use Illuminate\Support\Facades\DB;
 
 final class RegisterOrganizationAction
@@ -18,6 +19,8 @@ final class RegisterOrganizationAction
     public function handle(RegisterOrganizationDto $dto): User
     {
         return DB::transaction(function () use ($dto): User {
+            $this->ensureUniqueCredentials($dto->email, $dto->cnpj);
+
             $organization = $this->createOrganization($dto);
             $this->createAddress($organization, $dto->address);
 
@@ -25,34 +28,33 @@ final class RegisterOrganizationAction
         });
     }
 
+    private function ensureUniqueCredentials(Email $email, Cnpj $cnpj): void
+    {
+        if (User::where('email', $email->value())->exists()) {
+            throw new EmailAlreadyRegisteredException($email->value());
+        }
+
+        if (User::where('cnpj', $cnpj->value())->exists()) {
+            throw new CnpjAlreadyRegisteredException($cnpj->value());
+        }
+    }
+
     private function createOrganization(RegisterOrganizationDto $dto): User
     {
-        try {
-            return User::create([
-                'email' => $dto->email,
-                'password' => bcrypt($dto->password),
-                'user_type' => UserType::ORGANIZATION,
-                'organization_name' => $dto->organizationName,
-                'name' => $dto->organizationName,
-                'cnpj' => $dto->cnpj,
-                'responsible_name' => $dto->responsibleName,
-                'phone' => $dto->phone,
-                'mission_statement' => $dto->missionStatement,
-                'website' => $dto->website,
-                'social_media' => $dto->socialMedia?->toArray(),
-                'verified' => false,
-            ]);
-        } catch (QueryException $e) {
-            if ($e->getCode() !== '23000') {
-                throw $e;
-            }
-
-            if (User::where('email', $dto->email)->exists()) {
-                throw new EmailAlreadyRegisteredException($dto->email);
-            }
-
-            throw new CnpjAlreadyRegisteredException($dto->cnpj);
-        }
+        return User::create([
+            'email' => $dto->email,
+            'password' => bcrypt($dto->password->value()),
+            'user_type' => UserType::ORGANIZATION,
+            'organization_name' => $dto->organizationName,
+            'name' => $dto->organizationName,
+            'cnpj' => $dto->cnpj,
+            'responsible_name' => $dto->responsibleName,
+            'phone' => $dto->phone,
+            'mission_statement' => $dto->missionStatement,
+            'website' => $dto->website,
+            'social_media' => $dto->socialMedia?->toArray(),
+            'verified' => false,
+        ]);
     }
 
     private function createAddress(User $organization, AddressDto $address): void

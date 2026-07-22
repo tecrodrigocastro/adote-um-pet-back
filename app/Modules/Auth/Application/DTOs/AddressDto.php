@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Modules\Auth\Application\DTOs;
 
+use App\Modules\Auth\Application\Casts\ZipCodeValueObjectCast;
+use App\Modules\Auth\Domain\ValueObjects\ZipCode;
+use Spatie\LaravelData\Attributes\WithCast;
 use Spatie\LaravelData\Data;
 
 final class AddressDto extends Data
@@ -13,7 +16,8 @@ final class AddressDto extends Data
         public readonly string $neighborhood,
         public readonly int $numberHouse,
         public readonly ?string $complement,
-        public readonly string $zipCode,
+        #[WithCast(ZipCodeValueObjectCast::class)]
+        public readonly ZipCode $zipCode,
         public readonly string $city,
         public readonly string $state,
     ) {}
@@ -48,7 +52,7 @@ final class AddressDto extends Data
             'neighborhood' => $this->neighborhood,
             'number_house' => $this->numberHouse,
             'complement' => $this->complement,
-            'zip_code' => $this->zipCode,
+            'zip_code' => $this->zipCode->value(),
             'city' => $this->city,
             'state' => $this->state,
         ];

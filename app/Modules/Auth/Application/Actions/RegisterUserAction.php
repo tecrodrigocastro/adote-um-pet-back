@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Modules\Auth\Application\DTOs\AddressDto;
 use App\Modules\Auth\Application\DTOs\RegisterUserDto;
 use App\Modules\Auth\Domain\Exceptions\EmailAlreadyRegisteredException;
-use Illuminate\Database\QueryException;
+use App\Modules\Auth\Domain\ValueObjects\Email;
 use Illuminate\Support\Facades\DB;
 
 final class RegisterUserAction
@@ -16,6 +16,8 @@ final class RegisterUserAction
     public function handle(RegisterUserDto $dto): User
     {
         return DB::transaction(function () use ($dto): User {
+            $this->ensureEmailIsUnique($dto->email);
+
             $user = $this->createUser($dto);
             $this->createAddress($user, $dto->address);
 
@@ -23,23 +25,22 @@ final class RegisterUserAction
         });
     }
 
+    private function ensureEmailIsUnique(Email $email): void
+    {
+        if (User::where('email', $email->value())->exists()) {
+            throw new EmailAlreadyRegisteredException($email->value());
+        }
+    }
+
     private function createUser(RegisterUserDto $dto): User
     {
-        try {
-            return User::create([
-                'name' => $dto->name,
-                'email' => $dto->email,
-                'password' => bcrypt($dto->password),
-                'phone' => $dto->phone,
-                'photo_url' => $dto->photoUrl,
-            ]);
-        } catch (QueryException $e) {
-            if ($e->getCode() !== '23000') {
-                throw $e;
-            }
-
-            throw new EmailAlreadyRegisteredException($dto->email);
-        }
+        return User::create([
+            'name' => $dto->name,
+            'email' => $dto->email,
+            'password' => bcrypt($dto->password->value()),
+            'phone' => $dto->phone,
+            'photo_url' => $dto->photoUrl,
+        ]);
     }
 
     private function createAddress(User $user, AddressDto $address): void

@@ -32,8 +32,8 @@ it('creates a new user with address', function () {
 
     expect($user)->toBeInstanceOf(User::class)
         ->and($user->name)->toBe('John Doe')
-        ->and($user->email)->toBe('john@example.com')
-        ->and($user->phone)->toBe('11999999999')
+        ->and($user->email->value())->toBe('john@example.com')
+        ->and($user->phone->value())->toBe('11999999999')
         ->and($user->photo_url)->toBe('https://example.com/photo.jpg')
         ->and($user->addresses)->toHaveCount(1)
         ->and($user->addresses->first()->street)->toBe('Main St')

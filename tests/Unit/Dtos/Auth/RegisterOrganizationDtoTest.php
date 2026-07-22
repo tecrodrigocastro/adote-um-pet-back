@@ -4,37 +4,39 @@ use App\Dtos\Auth\AddressDto;
 use App\Dtos\Auth\RegisterOrganizationDto;
 use App\Dtos\Auth\SocialMediaDto;
 
-function registerOrganizationPayload(array $overrides = []): array
-{
-    return array_replace([
-        'email' => 'org@example.com',
-        'password' => 'secret123',
-        'organization_name' => 'Abrigo Patinhas Felizes',
-        'cnpj' => '12345678000199',
-        'responsible_name' => 'Maria Souza',
-        'phone' => '1234567890',
-        'mission_statement' => 'Resgatar e encontrar lares para animais abandonados.',
-        'website' => 'https://patinhasfelizes.org',
-        'social_media' => ['facebook' => 'https://facebook.com/patinhasfelizes'],
-        'address' => [
-            'street' => 'Rua das Flores',
-            'neighborhood' => 'Centro',
-            'number_house' => 123,
-            'complement' => null,
-            'zip_code' => '12345-678',
-            'city' => 'São Paulo',
-            'state' => 'SP',
-        ],
-    ], $overrides);
+if (! function_exists('legacyRegisterOrganizationPayload')) {
+    function legacyRegisterOrganizationPayload(array $overrides = []): array
+    {
+        return array_replace([
+            'email' => 'org@example.com',
+            'password' => 'secret123',
+            'organization_name' => 'Abrigo Patinhas Felizes',
+            'cnpj' => '00000000000191',
+            'responsible_name' => 'Maria Souza',
+            'phone' => '1234567890',
+            'mission_statement' => 'Resgatar e encontrar lares para animais abandonados.',
+            'website' => 'https://patinhasfelizes.org',
+            'social_media' => ['facebook' => 'https://facebook.com/patinhasfelizes'],
+            'address' => [
+                'street' => 'Rua das Flores',
+                'neighborhood' => 'Centro',
+                'number_house' => 123,
+                'complement' => null,
+                'zip_code' => '12345-678',
+                'city' => 'São Paulo',
+                'state' => 'SP',
+            ],
+        ], $overrides);
+    }
 }
 
 it('builds itself from an array, including the nested address and social media dtos', function () {
-    $dto = RegisterOrganizationDto::fromArray(registerOrganizationPayload());
+    $dto = RegisterOrganizationDto::fromArray(legacyRegisterOrganizationPayload());
 
     expect($dto->email)->toBe('org@example.com')
         ->and($dto->password)->toBe('secret123')
         ->and($dto->organizationName)->toBe('Abrigo Patinhas Felizes')
-        ->and($dto->cnpj)->toBe('12345678000199')
+        ->and($dto->cnpj)->toBe('00000000000191')
         ->and($dto->responsibleName)->toBe('Maria Souza')
         ->and($dto->phone)->toBe('1234567890')
         ->and($dto->missionStatement)->toBe('Resgatar e encontrar lares para animais abandonados.')
@@ -46,7 +48,7 @@ it('builds itself from an array, including the nested address and social media d
 });
 
 it('defaults website and social_media to null when missing', function () {
-    $payload = registerOrganizationPayload();
+    $payload = legacyRegisterOrganizationPayload();
     unset($payload['website'], $payload['social_media']);
 
     $dto = RegisterOrganizationDto::fromArray($payload);

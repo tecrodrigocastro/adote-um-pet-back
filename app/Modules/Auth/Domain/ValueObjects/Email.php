@@ -7,7 +7,7 @@ namespace App\Modules\Auth\Domain\ValueObjects;
 use InvalidArgumentException;
 use Stringable;
 
-final class Email implements Stringable
+final class Email implements ValueObject
 {
     private readonly string $value;
 
@@ -32,9 +32,9 @@ final class Email implements Stringable
         return $this->value;
     }
 
-    public function equals(self $other): bool
+    public function equals(ValueObject $other): bool
     {
-        return $this->value === $other->value;
+        return $other instanceof self && $this->value === $other->value;
     }
 
     public function __toString(): string
