@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AdoptionController;
-use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Chat\ChatController;
 use App\Http\Controllers\Message\MessageController;
 use App\Http\Controllers\OrganizationController;
@@ -18,18 +17,6 @@ Route::middleware('auth:sanctum')->prefix('pets')->group(function () {
     Route::put('/{pet}', [PetController::class, 'update']);
     Route::delete('/{pet}', [PetController::class, 'destroy']);
     Route::post('/{pet}/photos', [PetController::class, 'updatePhotos']);
-});
-
-Route::prefix('auth')->group(function () {
-    Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/register/organization', [AuthController::class, 'registerOrganization']);
-    Route::post('/login', [AuthController::class, 'login']);
-
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::post('/refresh', [AuthController::class, 'refresh']);
-        Route::get('/me', [AuthController::class, 'me']);
-    });
 });
 
 Route::middleware('auth:sanctum')->prefix('users')->group(function () {
