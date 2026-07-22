@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Modules\Auth\Application\DTOs\LoginUserDto;
+use App\Dtos\Auth\LoginUserDto;
 use Illuminate\Foundation\Http\FormRequest;
 use OpenApi\Attributes as OA;
 
@@ -53,6 +53,6 @@ class LoginRequest extends FormRequest
 
     public function toDto(): LoginUserDto
     {
-        return LoginUserDto::from($this->validated());
+        return LoginUserDto::fromArray($this->validated());
     }
 }

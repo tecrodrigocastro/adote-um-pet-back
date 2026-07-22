@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Modules\Auth\Application\DTOs\RegisterUserDto;
+use App\Dtos\Auth\RegisterUserDto;
 use Illuminate\Foundation\Http\FormRequest;
 use OpenApi\Attributes as OA;
 
@@ -95,6 +95,6 @@ class RegisterRequest extends FormRequest
 
     public function toDto(): RegisterUserDto
     {
-        return RegisterUserDto::from($this->validated());
+        return RegisterUserDto::fromArray($this->validated());
     }
 }
