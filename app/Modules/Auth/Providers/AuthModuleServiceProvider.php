@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Auth\Providers;
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 final class AuthModuleServiceProvider extends ServiceProvider
@@ -21,8 +22,8 @@ final class AuthModuleServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->loadRoutesFrom(
-            app_path('Modules/Auth/Infrastructure/Routes/auth.php')
-        );
+        Route::prefix('api')
+            ->middleware('api')
+            ->group(app_path('Modules/Auth/Infrastructure/Routes/auth.php'));
     }
 }
