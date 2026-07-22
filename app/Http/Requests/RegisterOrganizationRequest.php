@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Dtos\Auth\RegisterOrganizationDto;
+use App\Modules\Auth\Application\DTOs\RegisterOrganizationDto;
 use Illuminate\Foundation\Http\FormRequest;
 use OpenApi\Attributes as OA;
 
@@ -127,6 +127,6 @@ class RegisterOrganizationRequest extends FormRequest
 
     public function toDto(): RegisterOrganizationDto
     {
-        return RegisterOrganizationDto::fromArray($this->validated());
+        return RegisterOrganizationDto::from($this->validated());
     }
 }

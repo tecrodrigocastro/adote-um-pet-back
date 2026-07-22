@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Actions\Auth\LoginUserAction;
-use App\Actions\Auth\LogoutUserAction;
-use App\Actions\Auth\RefreshUserTokenAction;
-use App\Actions\Auth\RegisterOrganizationAction;
-use App\Actions\Auth\RegisterUserAction;
+use App\Modules\Auth\Application\Actions\LoginUserAction;
+use App\Modules\Auth\Application\Actions\LogoutUserAction;
+use App\Modules\Auth\Application\Actions\RefreshUserTokenAction;
+use App\Modules\Auth\Application\Actions\RegisterOrganizationAction;
+use App\Modules\Auth\Application\Actions\RegisterUserAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterOrganizationRequest;
