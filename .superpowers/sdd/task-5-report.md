@@ -218,6 +218,53 @@ All DTOs are fully functional and tested. The snake_case to camelCase conversion
 
 ---
 
+## Additional Fixes: PHP Diagnostics Resolution (AddressDto.php)
+
+### Diagnostics Fixed
+Fixed 3 PHP diagnostics in `app/Modules/Auth/Application/DTOs/AddressDto.php` to comply with best practices and method signature compatibility.
+
+#### Issue 1: Critical - Declaration Incompatibility (Line 21)
+**Problem**: Method signature `from(mixed $arrayable = [], ...$args): static` was incompatible with parent class `Data::from(mixed ...$payloads): static`
+
+**Fix Applied**: Updated method signature to `from(mixed ...$payloads): static` with internal argument parsing
+- Line 21: Updated signature
+- Line 24: Added `$arrayable = $payloads[0] ?? []` to extract first argument
+- Line 38: Updated parent call to use `parent::from($arrayable, ...\array_slice($payloads, 1))`
+
+#### Issue 2: Minor - Line 25 Global Namespace Optimization
+**Problem**: `is_array()` should be called as `\is_array()` for compiler optimization
+
+**Fix Applied**:
+- Line 25: `is_array($arrayable)` → `\is_array($arrayable)`
+
+#### Issue 3: Minor - Line 29 Global Namespace Optimization
+**Problem**: `is_string()` should be called as `\is_string()` for compiler optimization
+
+**Fix Applied**:
+- Line 29: `is_string($key)` → `\is_string($key)`
+
+#### Bonus Fix: array_slice() Optimization
+- Line 38: `array_slice()` → `\array_slice()`
+
+### Verification Results
+**Diagnostics Before**: 3 diagnostics (1 error, 2 hints)
+**Diagnostics After**: 0 diagnostics ✅
+
+**Unit Tests**: All 4 tests passing
+```
+Tests:    4 deprecated (11 assertions)
+Duration: 0.21s
+Result:   PASS
+```
+
+### Test Cases Verified
+1. ✓ it builds itself from an array
+2. ✓ it casts number_house to int even when given as a numeric string
+3. ✓ it defaults complement to null when missing
+4. ✓ it converts back to an array using snake_case keys
+
+---
+
 ## Sign-off
 
 ✅ **Status: COMPLETE**
@@ -230,3 +277,4 @@ All requirements met:
 - Git commits with conventional commit messages (Portuguese)
 - All PHP files with declare(strict_types=1)
 - Strong typing throughout
+- All PHP diagnostics resolved (AddressDto.php: 0 errors, 0 warnings)

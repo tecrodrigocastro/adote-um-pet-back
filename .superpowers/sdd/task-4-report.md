@@ -415,3 +415,65 @@ Ambas as issues foram completamente resolvidas:
 3. ✅ 100% dos testes passam (12/12)
 4. ✅ Conformidade mantida com global constraints
 5. ✅ Código mais legível e mantível
+
+---
+
+## Critical Issue Fix: Co-Authored-By Removal
+
+### Problema Identificado
+Commit `e14f4d0` continha `Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>` violando constraint global: commits DEVEM ser sem Co-Authored-By.
+
+### Solução Executada
+Utilizado script de rebase com `git commit-tree` para recriar o commit e2014f4d0 sem a linha Co-Authored-By:
+
+```bash
+PARENT=$(git rev-parse e14f4d0^)
+TREE=$(git rev-parse e14f4d0^{tree})
+MESSAGE=$(git log -1 --format=%B e14f4d0 | sed '/^Co-Authored-By:/d')
+NEW_COMMIT=$(git commit-tree -p $PARENT -m "$MESSAGE" $TREE)
+git rebase --onto $NEW_COMMIT e14f4d0
+```
+
+### Status da Correção
+
+**Commits Afetados:**
+- ✅ e14f4d0 → **d54fb08** (refactor: extract magic numbers and eliminate DRY violation in Cnpj checksum validation)
+- ✅ b60c9c2 → **fb0f1e8** (docs: append Cnpj refactoring subagent report to task-4 documentation)
+
+**Histórico após Fix:**
+```
+fb0f1e8 docs: append Cnpj refactoring subagent report to task-4 documentation
+d54fb08 refactor: extract magic numbers and eliminate DRY violation in Cnpj checksum validation
+b3ebd99 docs(sdd): adicionar relatório completo da task 4
+2e8a4b1 test(auth): adicionar testes para value objects (Email, Password, Cnpj)
+57ea3b6 feat(auth): criar value objects do domain (Email, Password, Cnpj)
+```
+
+**Verificação - Mensagem do Commit Refatorado (d54fb08):**
+```
+refactor: extract magic numbers and eliminate DRY violation in Cnpj checksum validation
+
+Issue 1 - DRY violation: Consolidated duplicated check digit calculation logic (lines 58-73 and 76-89) into a reusable private method calculateCheckDigit(). Both first and second digit validations now use the same logic, reducing code duplication and improving maintainability.
+
+Issue 2 - Magic numbers: Extracted all magic numbers into self-documented class constants:
+- CNPJ_LENGTH = 14
+- INITIAL_MULTIPLIER_FIRST = 5, INITIAL_MULTIPLIER_SECOND = 6
+- FIRST_CHECK_DIGIT_LOOP_LIMIT = 12, SECOND_CHECK_DIGIT_LOOP_LIMIT = 13
+- CHECK_DIGIT_INDEX_FIRST = 12, CHECK_DIGIT_INDEX_SECOND = 13
+- MULTIPLIER_MIN_VALUE = 1, MULTIPLIER_RESET_VALUE = 9
+- CHECKSUM_MODULO = 11, INVALID_CHECKSUM_OFFSET = 10
+
+All 12 unit tests pass. Code maintains strict typing and final class constraints.
+```
+
+**Verificação - Commits Limpos:**
+- ✅ Zero ocorrências de "Co-Authored-By" em todos os commits após o rebase
+- ✅ Conteúdo das mensagens de commit preservado (apenas a linha Co-Authored-By foi removida)
+- ✅ Histórico git limpo e conforme com constraints globais
+
+### Resultado Final
+- **Status**: ✅ COMPLETO
+- **Ação**: Removida linha Co-Authored-By do commit e14f4d0 via rebase
+- **Hash Anterior**: e14f4d0
+- **Hash Novo**: d54fb08
+- **Conformidade**: 100% aderente a constraint global (sem Co-Authored-By)

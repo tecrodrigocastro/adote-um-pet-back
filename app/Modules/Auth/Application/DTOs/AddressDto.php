@@ -18,14 +18,15 @@ final class AddressDto extends Data
         public readonly string $state,
     ) {}
 
-    public static function from(mixed $arrayable = [], ...$args): static
+    public static function from(mixed ...$payloads): static
     {
         // Handle snake_case to camelCase conversion for input
-        if (is_array($arrayable)) {
+        $arrayable = $payloads[0] ?? [];
+        if (\is_array($arrayable)) {
             $converted = [];
             foreach ($arrayable as $key => $value) {
                 // Convert snake_case to camelCase
-                $parts = explode('_', is_string($key) ? $key : (string) $key);
+                $parts = explode('_', \is_string($key) ? $key : (string) $key);
                 $first = array_shift($parts);
                 $rest = array_map('ucfirst', $parts);
                 $camelKey = $first . implode('', $rest);
@@ -34,7 +35,7 @@ final class AddressDto extends Data
             $arrayable = $converted;
         }
 
-        return parent::from($arrayable, ...$args);
+        return parent::from($arrayable, ...\array_slice($payloads, 1));
     }
 
     /**
